@@ -54,28 +54,50 @@
           <div class="divider"><span>或使用邮箱注册</span></div>
 
           <form @submit.prevent="handleRegister" class="auth-form">
-            <div class="form-row">
+            <!-- <div class="form-row"> -->
               <div class="form-group">
                 <label>姓名</label>
                 <input v-model="form.name" type="text" class="input-field" placeholder="你的名字" required />
               </div>
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label>手机号（可选）</label>
                 <input v-model="form.phone" type="tel" class="input-field" placeholder="+86 138..." />
-              </div>
-            </div>
+              </div> -->
+            <!-- </div> -->
             <div class="form-group">
               <label>邮箱地址</label>
               <input v-model="form.email" type="email" class="input-field" placeholder="your@email.com" required />
             </div>
             <div class="form-group">
               <label>设置密码</label>
-              <div class="password-wrap">
-                <input v-model="form.password" :type="showPwd ? 'text' : 'password'" class="input-field" placeholder="至少 8 位，包含字母和数字" required />
-                <button type="button" class="pwd-toggle" @click="showPwd = !showPwd">
-                  <svg v-if="!showPwd" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                </button>
+              <!-- 验证码输入框 -->
+              <div class="form-group">
+                <label>邮箱验证码</label>
+                <div class="code-input-wrap">
+                  <input v-model="form.verification_code" type="text" class="input-field" placeholder="请输入验证码" maxlength="6" />
+                  <button 
+                    type="button" 
+                    class="send-code-btn" 
+                    :disabled="sendingCodeLoading || !canSendCode"
+                    @click="handleSendCode"
+                  >
+                    <span v-if="sendingCodeLoading">发送中...</span>
+                    <span v-else-if="!canSendCode">{{ countdown }}s 后重发</span>
+                    <span v-else>获取验证码</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 密码输入框 -->
+              <div class="form-group">
+                <label>设置密码</label>
+                <div class="password-wrap">
+                  <input v-model="form.password" :type="showPwd ? 'text' : 'password'" class="input-field" placeholder="至少 8 位，包含字母和数字" required />
+                  <button type="button" class="pwd-toggle" @click="showPwd = !showPwd">
+                    <svg v-if="!showPwd" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </button>
+                </div>
               </div>
               <!-- Password strength -->
               <div class="pwd-strength" v-if="form.password">
@@ -115,13 +137,29 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { sendVerificationCode, register as apiRegister } from '@/api/register'
 
 const router = useRouter()
-const form = ref({ name: '', phone: '', email: '', password: '', invite: '' })
+// 表单数据
+const form = ref({ 
+  name: '', 
+  phone: '', 
+  email: '', 
+  password: '', 
+  verification_code: '',
+  invite: '' 
+})
 const showPwd = ref(false)
 const agreed = ref(false)
 const loading = ref(false)
 const error = ref('')
+
+// 验证码相关状态
+const sendingCodeLoading = ref(false)
+const countdown = ref(0)
+const canSendCode = ref(true)
+const verificationSent = ref(false) // 是否已发送过验证码
+
 
 const perks = [
   { icon: '🎁', text: '新用户注册即送 50 万 Token 体验额度' },
@@ -137,6 +175,7 @@ const stats = [
   { num: '99.9%', label: '可用率' },
 ]
 
+// 密码强度计算
 const pwdStrength = computed(() => {
   const pwd = form.value.password
   if (!pwd) return 0
@@ -147,21 +186,110 @@ const pwdStrength = computed(() => {
   if (/[^A-Za-z0-9]/.test(pwd)) score++
   return score
 })
+
 const strengthLabel = computed(() => ['', '弱', '一般', '强', '非常强'][pwdStrength.value])
 
+// 发送验证码
+async function handleSendCode() {
+  if (!canSendCode.value) return
+  
+  const email = form.value.email.trim()
+  
+  // 验证邮箱格式
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    error.value = '请输入有效的邮箱地址'
+    return
+  }
+  
+  sendingCodeLoading.value = true
+  try {
+    await sendVerificationCode(email)
+    verificationSent.value = true
+    
+    // 开始倒计时
+    countdown.value = 60
+    canSendCode.value = false
+    
+    const timer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0) {
+        clearInterval(timer)
+        canSendCode.value = true
+      }
+    }, 1000)
+    
+    error.value = ''
+  } catch (e) {
+    error.value = e.message || '发送验证码失败，请重试'
+    verificationSent.value = false
+  } finally {
+    sendingCodeLoading.value = false
+  }
+}
+
+// 处理注册提交
 async function handleRegister() {
   loading.value = true
   error.value = ''
+  
+  // 验证必填字段
+  if (!form.value.name.trim()) {
+    error.value = '请输入姓名'
+    return
+  }
+  if (!form.value.email.trim()) {
+    error.value = '请输入邮箱地址'
+    return
+  }
+  if (!form.value.password) {
+    error.value = '请输入密码'
+    return
+  }
+  if (pwdStrength.value < 3) {
+    error.value = '密码强度不足，请设置更复杂的密码（至少 8 位，包含大小写字母和数字）'
+    return
+  }
+  if (!form.value.verification_code) {
+    error.value = '请输入邮箱验证码'
+    return
+  }
+  
   try {
-    // TODO: Connect to your OpenWebUI registration API
-    // const res = await fetch('/api/auth/register', { method: 'POST', body: JSON.stringify(form.value) })
-    await new Promise(r => setTimeout(r, 1500))
-    router.push('/login')
+    // 调用注册 API
+    const result = await apiRegister({
+      username: form.value.name.trim().toLowerCase().replace(/\s+/g, '_'),
+      password: form.value.password,
+      email: form.value.email.trim(),
+      verification_code: form.value.verification_code,
+      aff_code: form.value.invite?.trim() || undefined
+    })
+    
+    // 注册成功，跳转到登录页并提示获取 API Token
+    error.value = ''
+    setTimeout(() => {
+      router.push({ 
+        path: '/login', 
+        query: { token: result.token, userId: result.user_id } 
+      })
+    }, 1000)
+    
   } catch (e) {
-    error.value = '注册失败，请稍后重试。'
+    error.value = e.message || '注册失败，请稍后重试'
   } finally {
     loading.value = false
   }
+}
+
+// 重置表单
+function resetForm() {
+  form.value = { name: '', phone: '', email: '', password: '', verification_code: '', invite: '' }
+  showPwd.value = false
+  agreed.value = false
+  error.value = ''
+  verificationSent.value = false
+  countdown.value = 0
+  canSendCode.value = true
 }
 </script>
 
@@ -265,6 +393,30 @@ async function handleRegister() {
   padding: 12px 16px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
   border-radius: var(--radius-sm); font-size: 13px; color: #f87171;
 }
+.code-input-wrap {
+  display: flex; gap: 8px;
+}
+.send-code-btn {
+  white-space: nowrap;
+  padding: 0 16px;
+  height: 38px;
+  background: rgba(56,189,248,0.1);
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+.send-code-btn:hover:not(:disabled) {
+  background: rgba(56,189,248,0.2);
+}
+.send-code-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .submit-btn { width: 100%; justify-content: center; padding: 14px; font-size: 15px; }
 .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .loading-dot {

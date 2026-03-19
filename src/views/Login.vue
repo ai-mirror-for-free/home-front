@@ -44,7 +44,7 @@
       <div class="auth-right">
         <div class="auth-form-wrap">
           <h1 class="auth-title">登录账号</h1>
-          <!-- <p class="auth-subtitle">还没有账号？<RouterLink to="/register" class="auth-link">免费注册</RouterLink></p> -->
+          <p class="auth-subtitle">还没有账号？<RouterLink to="/register" class="auth-link">免费注册</RouterLink></p>
 
           <!-- OAuth Buttons -->
           <!-- <div class="oauth-btns">
@@ -129,6 +129,12 @@ async function handleLogin() {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
+      // 检查错误信息中的detail字段，显示更友好的错误提示
+      if (errorData.detail && typeof errorData.detail === 'string') {
+        if (errorData.detail.includes('email or password') || errorData.detail.includes('邮箱') || errorData.detail.includes('密码')) {
+          throw new Error('用户名或密码错误')
+        }
+      }
       throw new Error(errorData.message || `登录失败: ${response.status} ${response.statusText}`)
     }
 

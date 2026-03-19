@@ -12,15 +12,14 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // 直接代理到OpenWebUI服务器，保持路径不变
-      '/api/v1': {
-        target: 'https://chat.yang-sjq.cn', // 使用真实的OpenWebUI服务器地址
-        changeOrigin: true,
-        secure: false, // 如果是HTTPS但证书有问题，设为false
-        rewrite: (path) => path // 不重写路径，保持原始路径
-      },
-      // 保留原有配置作为备用
+      // LobeAI API - 用户注册和验证接口
       '/api': {
+        target: 'http://154.64.231.128:25141',
+        changeOrigin: true,
+        secure: false
+      },
+      // OpenWebUI 服务器，保持路径不变
+      '/api/v1': {
         target: 'https://chat.yang-sjq.cn',
         changeOrigin: true,
         secure: false,
