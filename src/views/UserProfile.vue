@@ -19,7 +19,7 @@
           <div class="card-body">
             <div class="avatar-section">
               <div class="avatar">
-                <span>{{ userInfo.initials }}</span>
+                <span>{{ userInfo.initials || userInfo.name.charAt(0).toUpperCase() }}</span>
               </div>
               <div class="user-details">
                 <h3 class="user-name">{{ userInfo.name }}</h3>
@@ -28,10 +28,6 @@
             </div>
             
             <div class="account-stats">
-              <div class="stat-item">
-                <span class="stat-label">注册时间</span>
-                <span class="stat-value">{{ userInfo.registerDate }}</span>
-              </div>
               <div class="stat-item">
                 <span class="stat-label">账户状态</span>
                 <span class="stat-value stat-status-active">正常</span>
@@ -47,15 +43,15 @@
           </div>
           <div class="card-body">
             <div class="subscription-badge">
-              <span :class="['tag', 'tag-' + subscriptionInfo.planType]">
-                {{ subscriptionInfo.planName }}
+              <span :class="['tag', 'tag-' + mapPlanLevelToTag(quotaInfo.plan_level)]">
+                {{ formatPlanLevel(quotaInfo.plan_level) }}
               </span>
             </div>
             
             <div class="subscription-details">
               <div class="detail-item">
                 <span class="detail-label">到期时间</span>
-                <span class="detail-value">{{ subscriptionInfo.expiryDate }}</span>
+                <span class="detail-value">{{ formatExpiredTime(quotaInfo.expired_time) }}</span>
               </div>
               
               <div class="countdown-section">
@@ -63,15 +59,15 @@
                 <div 
                   :class="[
                     'countdown-value', 
-                    subscriptionInfo.daysLeft <= 7 ? 'countdown-warning' : ''
+                    daysUntilExpiration <= 7 ? 'countdown-warning' : ''
                   ]"
                 >
-                  {{ subscriptionInfo.daysLeft }} 天
+                  {{ daysUntilExpiration }} 天
                 </div>
               </div>
             </div>
             
-            <div class="subscription-status" v-if="!subscriptionInfo.isActive">
+            <div class="subscription-status" v-if="daysUntilExpiration <= 0">
               <span class="status-message">您的套餐已过期，请及时续费</span>
             </div>
             
@@ -85,6 +81,69 @@
               <RouterLink to="/buy-new" class="btn btn-outline">
                 购买新套餐
               </RouterLink>
+            </div>
+          </div>
+        </div>
+
+        <!-- 额度信息卡片 -->
+        <div class="card quota-card">
+          <div class="card-header">
+            <h2 class="card-title">使用额度</h2>
+          </div>
+          <div class="card-body">
+            <div class="quota-stats">
+              <div class="quota-item">
+                <span class="quota-label">剩余额度</span>
+                <span class="quota-value quota-remain">{{ quotaInfo.remain_quota.toLocaleString() }}</span>
+                <span class="quota-unit">tokens</span>
+              </div>
+              <div class="quota-item">
+                <span class="quota-label">已使用额度</span>
+                <span class="quota-value">{{ quotaInfo.used_quota.toLocaleString() }}</span>
+                <span class="quota-unit">tokens</span>
+              </div>
+              <div class="quota-item">
+                <span class="quota-label">套餐级别</span>
+                <span class="quota-value quota-plan">{{ formatPlanLevel(quotaInfo.plan_level) }}</span>
+              </div>
+              <div class="quota-item" v-if="quotaInfo.expired_time">
+                <span class="quota-label">额度过期时间</span>
+                <span class="quota-value">{{ formatExpiredTime(quotaInfo.expired_time) }}</span>
+              </div>
+            </div>
+            
+            <div class="model-limits" v-if="quotaInfo.model_limits">
+              <div class="model-limits-header">
+                <span class="model-limits-title">可用模型列表</span>
+                <button 
+                  @click="toggleModelList" 
+                  class="model-toggle-btn"
+                  :class="{ 'expanded': isModelListExpanded }"
+                >
+                  {{ isModelListExpanded ? '收起' : '展开' }} 
+                  <span class="toggle-icon" :class="{ 'rotated': isModelListExpanded }">▼</span>
+                </button>
+              </div>
+              <div 
+                class="model-list-wrapper" 
+                :class="{ 'expanded': isModelListExpanded, 'collapsed': !isModelListExpanded }"
+              >
+                <div class="model-list">
+                  <div 
+                    v-for="(model, index) in modelLimitsArray" 
+                    :key="index" 
+                    class="model-item"
+                  >
+                    {{ model }}
+                  </div>
+                </div>
+              </div>
+              <div 
+                v-show="!isModelListExpanded && modelLimitsArray.length > 6" 
+                class="model-count-indicator"
+              >
+                +{{ modelLimitsArray.length - 6 }} 个模型
+              </div>
             </div>
           </div>
         </div>
@@ -124,15 +183,38 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { updateUserQuota } from '@/api/register'
 
 const userStore = useUserStore()
 const isSupportDropdownVisible = ref(false)
+const loadingQuota = ref(false)
+const isModelListExpanded = ref(false)
 
 // 使用计算属性来响应式地获取用户信息
 const userInfo = computed(() => userStore.state.userInfo)
 const subscriptionInfo = computed(() => userStore.state.subscriptionInfo)
+const quotaInfo = computed(() => userStore.state.quotaInfo)
+
+// 计算距离套餐过期的天数
+const daysUntilExpiration = computed(() => {
+  if (!quotaInfo.value.expired_time) {
+    // 如果没有过期时间，则认为是永久有效的
+    return Infinity
+  }
+  
+  const now = Date.now()
+  const expirationTime = quotaInfo.value.expired_time * 1000 // 转换为毫秒
+  const diffMs = expirationTime - now
+  
+  if (diffMs <= 0) {
+    return 0 // 已过期
+  }
+  
+  // 转换为天数
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+})
 
 // 客服支持选项
 const supportOptions = [
@@ -148,8 +230,56 @@ const supportOptions = [
   }
 ]
 
+// 将模型限制字符串转换为数组
+const modelLimitsArray = computed(() => {
+  if (!quotaInfo.value.model_limits) return []
+  return quotaInfo.value.model_limits.split(',').map(model => model.trim()).filter(model => model)
+})
+
+// 格式化套餐级别
+const formatPlanLevel = (planLevel) => {
+  const planMap = {
+    'free': '免费版',
+    'basic': '基础版',
+    'pro': '专业版',
+    'premium': '高级版',
+    'enterprise': '企业版'
+  }
+  return planMap[planLevel] || planLevel
+}
+
+// 映射套餐级别到标签类型
+const mapPlanLevelToTag = (planLevel) => {
+  const tagMap = {
+    'free': 'gray',
+    'basic': 'blue',
+    'pro': 'cyan',
+    'premium': 'purple',
+    'enterprise': 'green'
+  }
+  return tagMap[planLevel] || 'gray'
+}
+
+// 格式化过期时间
+const formatExpiredTime = (timestamp) => {
+  if (!timestamp) return '无限制'
+  const date = new Date(timestamp * 1000)
+  return date.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
 const toggleSupportDropdown = () => {
   isSupportDropdownVisible.value = !isSupportDropdownVisible.value
+}
+
+// 切换模型列表展开/收起状态
+const toggleModelList = () => {
+  isModelListExpanded.value = !isModelListExpanded.value
 }
 
 // 新增函数：跳转到OpenWebUI
@@ -164,6 +294,35 @@ const goToOpenWebUI = () => {
     alert('用户未登录或缺少访问令牌');
   }
 }
+
+// 获取用户额度信息
+const fetchUserQuota = async () => {
+  try {
+    loadingQuota.value = true
+    const username = userStore.getUserName()
+    const email = userStore.getUserEmail()
+    
+    if (!username || !email) {
+      console.warn('无法获取用户额度：缺少用户名或邮箱')
+      return
+    }
+    
+    const quotaData = await updateUserQuota({ username, email })
+    userStore.updateQuotaInfo(quotaData)
+  } catch (error) {
+    console.error('获取用户额度失败:', error.message)
+    // 可以在这里添加错误提示
+  } finally {
+    loadingQuota.value = false
+  }
+}
+
+// 页面加载时获取用户额度信息
+onMounted(() => {
+  if (userStore.state.isLoggedIn) {
+    fetchUserQuota()
+  }
+})
 </script>
 
 <style scoped>
@@ -372,6 +531,136 @@ const goToOpenWebUI = () => {
   margin-top: auto;
 }
 
+/* 额度信息卡片样式 */
+.quota-card {
+  grid-column: span 1;
+}
+
+.quota-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quota-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.quota-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.quota-value {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quota-remain {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.quota-unit {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.quota-plan {
+  text-transform: capitalize;
+}
+
+.model-limits {
+  margin-top: 20px;
+}
+
+.model-limits-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.model-limits-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.model-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--accent-cyan);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s;
+}
+
+.model-toggle-btn:hover {
+  background-color: rgba(56, 189, 248, 0.1);
+}
+
+.toggle-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 0.7rem;
+  transform-origin: center;
+}
+
+.toggle-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.model-list-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.model-list-wrapper.expanded {
+  max-height: 500px; /* 设置一个足够大的值，根据需要调整 */
+}
+
+.model-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.model-item {
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.model-count-indicator {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 8px 0;
+  background-color: rgba(128, 128, 128, 0.1);
+  border-radius: var(--radius-sm);
+  margin-top: 8px;
+}
+
 /* 快捷入口卡片样式 */
 .quick-access-card {
   grid-column: span 2;
@@ -514,11 +803,12 @@ const goToOpenWebUI = () => {
 
 @media (min-width: 993px) {
   .profile-grid {
-    grid-template-columns: 1fr 1fr; /* 两列布局 */
+    grid-template-columns: repeat(3, 1fr); /* 三列布局 */
   }
   
   .profile-info-card,
-  .subscription-card {
+  .subscription-card,
+  .quota-card {
     grid-column: span 1; /* 每个卡片占据一列 */
   }
 }
@@ -529,7 +819,8 @@ const goToOpenWebUI = () => {
   }
   
   .profile-info-card,
-  .subscription-card {
+  .subscription-card,
+  .quota-card {
     grid-column: span 1;
   }
   

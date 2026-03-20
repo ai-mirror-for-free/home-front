@@ -65,7 +65,38 @@ export async function register({ username, password, email, verification_code, a
   }
 }
 
+// 查询用户额度
+export async function updateUserQuota({ username, email }) {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/update-user-quota`, {
+      username,
+      email
+    })
+    return response.data
+  } catch (error) {
+    if (error.response) {
+      // 服务器返回了错误响应
+      const data = error.response.data
+      if (data.detail && Array.isArray(data.detail)) {
+        // Pydantic 验证错误
+        throw new Error(data.detail[0].msg || '查询额度失败')
+      } else if (data.message) {
+        throw new Error(data.message)
+      } else {
+        throw new Error('查询额度失败：' + JSON.stringify(data))
+      }
+    } else if (error.request) {
+      // 请求已发出但没有收到响应
+      throw new Error('网络错误，请检查网络连接')
+    } else {
+      // 其他错误
+      throw new Error(error.message || '查询额度失败')
+    }
+  }
+}
+
 export default {
   sendVerificationCode,
-  register
+  register,
+  updateUserQuota
 }

@@ -236,22 +236,27 @@ async function handleRegister() {
   // 验证必填字段
   if (!form.value.name.trim()) {
     error.value = '请输入姓名'
+    loading.value = false
     return
   }
   if (!form.value.email.trim()) {
     error.value = '请输入邮箱地址'
+    loading.value = false
     return
   }
   if (!form.value.password) {
     error.value = '请输入密码'
+    loading.value = false
     return
   }
   if (pwdStrength.value < 3) {
     error.value = '密码强度不足，请设置更复杂的密码（至少 8 位，包含大小写字母和数字）'
+    loading.value = false
     return
   }
   if (!form.value.verification_code) {
     error.value = '请输入邮箱验证码'
+    loading.value = false
     return
   }
   

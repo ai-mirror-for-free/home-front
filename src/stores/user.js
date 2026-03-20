@@ -4,12 +4,11 @@ import { reactive, readonly } from 'vue';
 const state = reactive({
   userInfo: {
     id: null,
-    name: '张三',
-    email: 'zhangsan@example.com',
+    name: '', // 移除默认值
+    email: '', // 移除默认值
     role: '',
     profile_image_url: null,
-    initials: 'ZS',
-    registerDate: '2023年5月12日',
+    initials: '',
     avatar: null // 可选的头像URL
   },
   authInfo: {
@@ -25,6 +24,13 @@ const state = reactive({
     daysLeft: 245,
     isActive: true
   },
+  quotaInfo: {
+    remain_quota: 0,
+    model_limits: '',
+    used_quota: 0,
+    expired_time: 0,
+    plan_level: ''
+  },
   isLoggedIn: false
 });
 
@@ -34,13 +40,16 @@ export function useUserStore() {
     
     // 更新用户信息
     if (userData) {
+      // 计算姓名首字母缩写
+      const nameInitials = userData.name ? userData.name.charAt(0).toUpperCase() : '';
+      
       Object.assign(state.userInfo, {
         id: userData.id || state.userInfo.id,
         name: userData.name || state.userInfo.name,
         email: userData.email || state.userInfo.email,
         role: userData.role || state.userInfo.role,
         profile_image_url: userData.profile_image_url || state.userInfo.profile_image_url,
-        initials: userData.initials || state.userInfo.initials,
+        initials: userData.initials || nameInitials || state.userInfo.initials,
         avatar: userData.avatar || userData.profile_image_url || state.userInfo.avatar
       });
     }
@@ -65,12 +74,11 @@ export function useUserStore() {
     // 重置为默认用户数据
     state.userInfo = {
       id: null,
-      name: '张三',
-      email: 'zhangsan@example.com',
+      name: '',
+      email: '',
       role: '',
       profile_image_url: null,
-      initials: 'ZS',
-      registerDate: '2023年5月12日',
+      initials: '',
       avatar: null
     };
     state.authInfo = {
@@ -79,10 +87,21 @@ export function useUserStore() {
       expires_at: null
     };
     state.permissions = {};
+    state.quotaInfo = {
+      remain_quota: 0,
+      model_limits: '',
+      used_quota: 0,
+      expired_time: 0,
+      plan_level: ''
+    };
   };
 
   const updateSubscription = (subscriptionData) => {
     Object.assign(state.subscriptionInfo, subscriptionData);
+  };
+
+  const updateQuotaInfo = (quotaData) => {
+    Object.assign(state.quotaInfo, quotaData);
   };
 
   // 添加一个方法用于获取token
@@ -105,6 +124,7 @@ export function useUserStore() {
     login,
     logout,
     updateSubscription,
+    updateQuotaInfo,
     getToken,
     getUserEmail,
     getUserName
