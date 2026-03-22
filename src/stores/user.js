@@ -1,38 +1,97 @@
 // 简单的用户状态管理
 import { reactive, readonly } from 'vue';
 
-const state = reactive({
-  userInfo: {
-    id: null,
-    name: '', // 移除默认值
-    email: '', // 移除默认值
-    role: '',
-    profile_image_url: null,
-    initials: '',
-    avatar: null // 可选的头像URL
-  },
-  authInfo: {
-    token: '',
-    token_type: '',
-    expires_at: null
-  },
-  permissions: {},
-  subscriptionInfo: {
-    planName: '专业版',
-    planType: 'cyan', // 对应样式类
-    expiryDate: '2024年12月31日',
-    daysLeft: 245,
-    isActive: true
-  },
-  quotaInfo: {
-    remain_quota: 0,
-    model_limits: '',
-    used_quota: 0,
-    expired_time: 0,
-    plan_level: ''
-  },
-  isLoggedIn: false
+// 从localStorage恢复状态
+const restoreState = () => {
+  const storedState = localStorage.getItem('userStore');
+  if (storedState) {
+    try {
+      return JSON.parse(storedState);
+    } catch (e) {
+      console.error('Error parsing stored user state:', e);
+    }
+  }
+
+  // 默认状态
+  return {
+    userInfo: {
+      id: null,
+      name: '', // 移除默认值
+      email: '', // 移除默认值
+      role: '',
+      profile_image_url: null,
+      initials: '',
+      avatar: null // 可选的头像URL
+    },
+    authInfo: {
+      token: '',
+      token_type: '',
+      expires_at: null
+    },
+    permissions: {},
+    subscriptionInfo: {
+      planName: '专业版',
+      planType: 'cyan', // 对应样式类
+      expiryDate: '2024年12月31日',
+      daysLeft: 245,
+      isActive: true
+    },
+    quotaInfo: {
+      remain_quota: 0,
+      model_limits: '',
+      used_quota: 0,
+      expired_time: 0,
+      plan_level: ''
+    },
+    isLoggedIn: false
+  };
+};
+
+// 初始化状态
+const state = reactive(restoreState());
+
+// 监听状态变化并保存到localStorage
+const saveState = () => {
+  localStorage.setItem('userStore', JSON.stringify(state));
+};
+
+// 为state添加监听器，当状态改变时自动保存
+Object.defineProperty(state, '_watcher', {
+  writable: false,
+  enumerable: false,
+  value: () => {
+    // 使用 nextTick 确保在 DOM 更新后再保存状态
+    Promise.resolve().then(() => {
+      saveState();
+    });
+  }
 });
+
+// 重写属性设置器，使其触发保存
+const originalUserInfo = { ...state.userInfo };
+const originalAuthInfo = { ...state.authInfo };
+const originalPermissions = { ...state.permissions };
+const originalSubscriptionInfo = { ...state.subscriptionInfo };
+const originalQuotaInfo = { ...state.quotaInfo };
+const originalIsLoggedIn = state.isLoggedIn;
+
+// 保存状态变更的代理
+const createProxy = (target, key) => {
+  return new Proxy(target, {
+    set(obj, prop, value) {
+      obj[prop] = value;
+      state._watcher(); // 触发状态保存
+      return true;
+    }
+  });
+};
+
+// 为各个对象创建代理
+state.userInfo = createProxy(state.userInfo, 'userInfo');
+state.authInfo = createProxy(state.authInfo, 'authInfo');
+state.permissions = createProxy(state.permissions, 'permissions');
+state.subscriptionInfo = createProxy(state.subscriptionInfo, 'subscriptionInfo');
+state.quotaInfo = createProxy(state.quotaInfo, 'quotaInfo');
 
 export function useUserStore() {
   const login = (userData, authData = null, permissionsData = null) => {
@@ -65,14 +124,14 @@ export function useUserStore() {
     
     // 更新权限信息
     if (permissionsData) {
-      state.permissions = permissionsData;
+      Object.assign(state.permissions, permissionsData);
     }
   };
 
   const logout = () => {
     state.isLoggedIn = false;
     // 重置为默认用户数据
-    state.userInfo = {
+    Object.assign(state.userInfo, {
       id: null,
       name: '',
       email: '',
@@ -80,20 +139,23 @@ export function useUserStore() {
       profile_image_url: null,
       initials: '',
       avatar: null
-    };
-    state.authInfo = {
+    });
+    Object.assign(state.authInfo, {
       token: '',
       token_type: '',
       expires_at: null
-    };
-    state.permissions = {};
-    state.quotaInfo = {
+    });
+    Object.assign(state.permissions, {});
+    Object.assign(state.quotaInfo, {
       remain_quota: 0,
       model_limits: '',
       used_quota: 0,
       expired_time: 0,
       plan_level: ''
-    };
+    });
+
+    // 清除本地存储
+    localStorage.removeItem('userStore');
   };
 
   const updateSubscription = (subscriptionData) => {

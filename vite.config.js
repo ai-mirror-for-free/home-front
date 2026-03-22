@@ -12,19 +12,19 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // LobeAI API - 用户注册和验证接口
-      '/api': {
-        target: 'http://154.64.231.128:25141',
-        changeOrigin: true,
-        secure: false
-      },
-      // OpenWebUI 服务器，保持路径不变
+            // OpenWebUI 服务器，保持路径不变
       '/api/v1': {
         target: 'https://chat.yang-sjq.cn',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path
-      }
+      },
+      // LobeAI API - 用户注册和验证接口
+      '/api': {
+        target: 'http://localhost:25141',
+        changeOrigin: true,
+        secure: false
+      },
     }
   }
 })

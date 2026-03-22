@@ -24,14 +24,47 @@
         <li><RouterLink to="/pricing" class="nav-link">定价方案</RouterLink></li>
         <li><a href="#features" class="nav-link">功能特性</a></li>
         <li><a href="#faq" class="nav-link">常见问题</a></li>
+        
+        <!-- 管理员入口 -->
+        <template v-if="isAdmin">
+          <li><RouterLink to="/admin" class="nav-link admin-link">管理员后台</RouterLink></li>
+        </template>
       </ul>
 
       <!-- Actions -->
       <div class="nav-actions">
-        <!-- 如果用户已登录，显示个人主页链接 -->
+        <!-- 如果用户已登录，显示头像下拉菜单 -->
         <template v-if="userStore.state.isLoggedIn">
-          <RouterLink to="/profile" class="btn btn-ghost">个人中心</RouterLink>
-          <button @click="handleLogout" class="btn btn-primary">退出登录</button>
+          <div class="user-dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
+            <button class="avatar-btn" @click="toggleDropdown" aria-label="User menu">
+              <div class="avatar">
+                <span v-if="!userStore.state.userInfo.avatar">{{ userStore.state.userInfo.initials || 'U' }}</span>
+                <img v-else :src="userStore.state.userInfo.avatar" :alt="userStore.state.userInfo.name" />
+              </div>
+            </button>
+            
+            <div class="dropdown-menu" :class="{ 'show': showDropdown }">
+              <div class="dropdown-header">
+                <div class="avatar-large">
+                  <span v-if="!userStore.state.userInfo.avatar">{{ userStore.state.userInfo.initials || 'U' }}</span>
+                  <img v-else :src="userStore.state.userInfo.avatar" :alt="userStore.state.userInfo.name" />
+                </div>
+                <div class="user-info">
+                  <h4>{{ userStore.state.userInfo.name || '用户' }}</h4>
+                  <p>{{ userStore.state.userInfo.email }}</p>
+                </div>
+              </div>
+              
+              <div class="dropdown-body">
+                <RouterLink to="/profile" class="dropdown-item" @click="closeDropdown">
+                  <i class="icon-user"></i> 个人中心
+                </RouterLink>
+                <button class="dropdown-item" @click="handleLogout" @click.stop="closeDropdown">
+                  <i class="icon-logout"></i> 退出登录
+                </button>
+              </div>
+            </div>
+          </div>
         </template>
         <template v-else>
           <RouterLink to="/login" class="btn btn-ghost">登录</RouterLink>
@@ -54,6 +87,11 @@
       <a href="#features" class="mobile-link" @click="mobileOpen=false">功能特性</a>
       <a href="#faq" class="mobile-link" @click="mobileOpen=false">常见问题</a>
       
+      <!-- 管理员入口 -->
+      <template v-if="isAdmin">
+        <RouterLink to="/admin" class="mobile-link admin-link" @click="mobileOpen=false">管理员后台</RouterLink>
+      </template>
+      
       <template v-if="userStore.state.isLoggedIn">
         <RouterLink to="/profile" class="mobile-link" @click="mobileOpen=false">个人中心</RouterLink>
         <div class="mobile-actions">
@@ -71,22 +109,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 const isScrolled = ref(false)
 const mobileOpen = ref(false)
+const showDropdown = ref(false)
 const router = useRouter()
 const userStore = useUserStore()
 
-function handleScroll() {
-  isScrolled.value = window.scrollY > 20
+// 检查是否为管理员
+const isAdmin = computed(() => {
+  return userStore.state.isAdmin || localStorage.getItem('adminToken') !== null
+})
+
+function toggleDropdown() {
+  showDropdown.value = !showDropdown.value
+}
+
+function closeDropdown() {
+  showDropdown.value = false
 }
 
 function handleLogout() {
   userStore.logout()
   router.push('/')
+  closeDropdown()
 }
 
 function handleLogoutAndCloseMenu() {
@@ -100,6 +149,10 @@ onMounted(() => {
   // 例如从localStorage、Vuex store或API检查认证状态
 })
 onUnmounted(() => window.removeEventListener('scroll', handleScroll))
+
+function handleScroll() {
+  isScrolled.value = window.scrollY > 20
+}
 </script>
 
 <style scoped>
@@ -160,6 +213,173 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 .nav-link:hover, .nav-link.router-link-active {
   color: var(--text-primary);
   background: rgba(255,255,255,0.06);
+}
+
+/* 管理员链接样式 */
+.admin-link {
+  background: linear-gradient(135deg, #6f42c1, #9333ea);
+  color: white;
+  padding: 8px 16px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+}
+
+.admin-link:hover {
+  background: linear-gradient(135deg, #5a32a3, #7c2d12);
+  transform: translateY(-1px);
+}
+
+.mobile-link.admin-link {
+  color: white;
+  background: linear-gradient(135deg, #6f42c1, #9333ea);
+  border: none;
+  margin-top: 8px;
+}
+
+.mobile-link.admin-link:hover {
+  opacity: 0.9;
+  transform: none;
+}
+
+/* 头像按钮样式 */
+.user-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.avatar-btn:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38bdf8, #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 下拉菜单样式 */
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  width: 280px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  padding: 16px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  padding: 0 20px 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.avatar-large {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38bdf8, #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  margin-right: 12px;
+  overflow: hidden;
+}
+
+.avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-info h4 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.user-info p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.dropdown-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background-color 0.2s;
+  border: none;
+  background: none;
+  width: 100%;
+  font-size: 14px;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+}
+
+.icon-user::before {
+  content: "👤";
+  margin-right: 8px;
+}
+
+.icon-logout::before {
+  content: "🚪";
+  margin-right: 8px;
 }
 
 .nav-actions {

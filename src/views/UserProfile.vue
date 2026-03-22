@@ -11,30 +11,6 @@
       </div>
 
       <div class="profile-grid">
-        <!-- 用户信息卡片 -->
-        <div class="card profile-info-card">
-          <div class="card-header">
-            <h2 class="card-title">账户信息</h2>
-          </div>
-          <div class="card-body">
-            <div class="avatar-section">
-              <div class="avatar">
-                <span>{{ userInfo.initials || userInfo.name.charAt(0).toUpperCase() }}</span>
-              </div>
-              <div class="user-details">
-                <h3 class="user-name">{{ userInfo.name }}</h3>
-                <p class="user-email">{{ userInfo.email }}</p>
-              </div>
-            </div>
-            
-            <div class="account-stats">
-              <div class="stat-item">
-                <span class="stat-label">账户状态</span>
-                <span class="stat-value stat-status-active">正常</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- 套餐信息卡片 -->
         <div class="card subscription-card">
@@ -81,6 +57,41 @@
               <RouterLink to="/buy-new" class="btn btn-outline">
                 购买新套餐
               </RouterLink>
+            </div>
+            
+            <!-- 兑换码兑换区域 -->
+            <div class="redemption-section">
+              <h3 class="redemption-title">兑换码兑换</h3>
+              <div class="redemption-description">
+                <p>如果您有兑换码，可以在此兑换套餐或额度。</p>
+              </div>
+              
+              <div class="redemption-form">
+                <div class="form-group">
+                  <label for="redemption-code" class="form-label">兑换码</label>
+                  <input
+                    id="redemption-code"
+                    v-model="redemptionCode"
+                    type="text"
+                    placeholder="请输入16位兑换码"
+                    class="form-input"
+                    :disabled="redemptionLoading"
+                  />
+                </div>
+                
+                <button 
+                  @click="handleRedeemCode" 
+                  class="btn btn-primary btn-full"
+                  :disabled="redemptionLoading || !redemptionCode"
+                >
+                  <span v-if="redemptionLoading">兑换中...</span>
+                  <span v-else>兑换</span>
+                </button>
+                
+                <div v-if="redemptionMessage" class="redemption-message" :class="redemptionMessageType">
+                  {{ redemptionMessage }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -186,11 +197,18 @@
 import { computed, ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { updateUserQuota } from '@/api/register'
+import { redeemCode } from '@/api/admin' // 假设redeemCode函数在admin.js中
 
 const userStore = useUserStore()
 const isSupportDropdownVisible = ref(false)
 const loadingQuota = ref(false)
 const isModelListExpanded = ref(false)
+
+// 新增兑换码相关变量
+const redemptionCode = ref('')
+const redemptionLoading = ref(false)
+const redemptionMessage = ref('')
+const redemptionMessageType = ref('') // 'success' or 'error'
 
 // 使用计算属性来响应式地获取用户信息
 const userInfo = computed(() => userStore.state.userInfo)
@@ -314,6 +332,41 @@ const fetchUserQuota = async () => {
     // 可以在这里添加错误提示
   } finally {
     loadingQuota.value = false
+  }
+}
+
+// 兑换码兑换处理函数
+const handleRedeemCode = async () => {
+  if (!redemptionCode.value) {
+    redemptionMessage.value = '请输入兑换码';
+    redemptionMessageType.value = 'error';
+    return;
+  }
+
+  redemptionLoading.value = true;
+  redemptionMessage.value = '';
+  
+  try {
+    const response = await redeemCode({
+      code: redemptionCode.value,
+      email: userInfo.value.email // 使用当前用户的邮箱
+    });
+
+    // 成功兑换后显示消息
+    redemptionMessage.value = response.message || '兑换成功！';
+    redemptionMessageType.value = 'success';
+
+    // 清空输入框
+    redemptionCode.value = '';
+    
+    // 刷新用户信息
+    await fetchUserQuota();
+  } catch (error) {
+    console.error('兑换失败:', error);
+    redemptionMessage.value = error.response?.data?.message || error.message || '兑换失败，请检查兑换码是否正确';
+    redemptionMessageType.value = 'error';
+  } finally {
+    redemptionLoading.value = false;
   }
 }
 
@@ -528,7 +581,95 @@ onMounted(() => {
 .subscription-actions {
   display: flex;
   gap: 16px;
-  margin-top: auto;
+  margin-bottom: 24px;
+}
+
+.redemption-section {
+  padding: 20px;
+  background: var(--bg-card-hover);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  width: 100%;
+}
+
+.redemption-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.redemption-description {
+  margin-bottom: 16px;
+}
+
+.redemption-description p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.redemption-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.form-input {
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+
+.form-input:disabled {
+  background-color: var(--bg-disabled);
+  cursor: not-allowed;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.redemption-message {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.redemption-message.success {
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.redemption-message.error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
 }
 
 /* 额度信息卡片样式 */
@@ -661,68 +802,124 @@ onMounted(() => {
   margin-top: 8px;
 }
 
-/* 快捷入口卡片样式 */
-.quick-access-card {
-  grid-column: span 2;
+/* 兑换码卡片样式 */
+.redemption-card {
+  grid-column: span 1;
 }
 
-.quick-access-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+.redemption-description {
+  margin-bottom: 20px;
+}
+
+.redemption-description p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.redemption-form {
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
-.access-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 24px;
+.form-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: var(--transition);
-  text-decoration: none;
-  color: inherit;
+  gap: 8px;
 }
 
-.access-card:hover {
-  border-color: var(--border-glow);
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.access-icon {
-  margin-bottom: 16px;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.access-icon-openwebui {
-  background: rgba(56, 189, 248, 0.1);
-}
-
-.access-icon-api {
-  background: rgba(167, 139, 250, 0.1);
-}
-
-.access-title {
+.form-label {
   color: var(--text-primary);
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.access-desc {
-  color: var(--text-secondary);
+  font-weight: 500;
   font-size: 0.95rem;
 }
 
-/* 客服支持卡片样式 */
+.form-input {
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+}
+
+.form-input:disabled {
+  background-color: var(--bg-disabled);
+  cursor: not-allowed;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.redemption-message {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-weight: 500;
+}
+
+.redemption-message.success {
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.redemption-message.error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+/* 按钮样式 */
+.btn {
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: var(--gradient-accent);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+}
+
+.btn-primary:disabled {
+  background: var(--bg-disabled);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--border);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
 /* 悬浮客服按钮样式 */
 .floating-support {
   position: fixed;
@@ -798,68 +995,5 @@ onMounted(() => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(56, 189, 248, 0.1);
-}
-
-@media (min-width: 993px) {
-  .profile-grid {
-    grid-template-columns: repeat(3, 1fr); /* 三列布局 */
-  }
-  
-  .profile-info-card,
-  .subscription-card,
-  .quota-card {
-    grid-column: span 1; /* 每个卡片占据一列 */
-  }
-}
-
-@media (max-width: 992px) {
-  .profile-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .profile-info-card,
-  .subscription-card,
-  .quota-card {
-    grid-column: span 1;
-  }
-  
-  .subscription-details {
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .account-stats {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .subscription-actions {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 768px) {
-  .page-title {
-    font-size: 2rem;
-  }
-  
-  .card {
-    padding: 24px;
-  }
-  
-  .avatar-section {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .floating-support {
-    bottom: 20px;
-    right: 20px;
-  }
-  
-  .support-dropdown {
-    width: 200px;
-  }
 }
 </style>
