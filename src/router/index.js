@@ -67,21 +67,23 @@ const router = createRouter({
 // 添加路由守卫检查管理员权限
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAdmin)) {
-    // 检查是否有管理员token
+    // 检查是否有管理员 token
     const adminToken = localStorage.getItem('adminToken')
     if (!adminToken) {
-      // 如果没有管理员token，重定向到管理员登录页
+      // 如果没有管理员 token，重定向到管理员登录页
       next('/admin/login')
     } else {
-      // 如果有token，继续
+      // 如果有 token，继续
       next()
     }
   } else if (to.matched.some(record => record.meta.requiresAuth)) {
     // 检查普通用户认证
     const token = localStorage.getItem('token')
-    if (!token) {
+    if (!token || token === undefined) {
+      // 如果没有 token 或 token 不存在，重定向到登录页
       next('/login')
     } else {
+      // 如果有 token，继续
       next()
     }
   } else {

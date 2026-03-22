@@ -97,6 +97,11 @@ export function useUserStore() {
   const login = (userData, authData = null, permissionsData = null) => {
     state.isLoggedIn = true;
     
+    // 登录成功后，将 token 保存到 localStorage，用于路由守卫检查
+    if (authData && authData.token) {
+      localStorage.setItem('token', authData.token);
+    }
+    
     // 更新用户信息
     if (userData) {
       // 计算姓名首字母缩写
@@ -126,10 +131,15 @@ export function useUserStore() {
     if (permissionsData) {
       Object.assign(state.permissions, permissionsData);
     }
+    
+    // 登录成功后，立即保存状态到 localStorage
+    saveState();
   };
 
   const logout = () => {
     state.isLoggedIn = false;
+    // 清除 localStorage 中的 token
+    localStorage.removeItem('token');
     // 重置为默认用户数据
     Object.assign(state.userInfo, {
       id: null,
