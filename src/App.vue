@@ -1,15 +1,26 @@
 <template>
   <div id="app">
-    <AppNav />
+    <!-- 非管理员页面显示顶部导航栏 -->
+    <template v-if="!isAdminRoute">
+      <AppNav />
+    </template>
     <RouterView />
     <AppFooter />
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppNav from './components/AppNav.vue'
 import AppFooter from './components/AppFooter.vue'
-import { RouterView } from 'vue-router'
+
+const route = useRoute()
+
+// 判断是否为管理员相关路由
+const isAdminRoute = computed(() => {
+  return route.path.startsWith('/admin')
+})
 </script>
 
 <style>
