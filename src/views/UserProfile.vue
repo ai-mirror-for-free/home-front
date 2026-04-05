@@ -304,8 +304,12 @@ const toggleModelList = () => {
 const goToOpenWebUI = () => {
   const token = userStore.getToken();
   if (token) {
-    // 构造带token的重定向URL
-    const openWebUIUrl = 'https://chat.yang-sjq.cn/sso'; // 替换为实际的OpenWebUI地址
+    // 获取当前域名，提取主域名后拼接 chat. 前缀
+    const currentHostname = window.location.hostname;
+    const parts = currentHostname.split('.');
+    // 提取最后两部分作为主域名（如 www.domain.com -> domain.com）
+    const mainDomain = parts.slice(-2).join('.');
+    const openWebUIUrl = `https://chat.${mainDomain}/sso`;
     const redirectUrl = `${openWebUIUrl}?token=${encodeURIComponent(token)}`;
     window.open(redirectUrl, '_blank');
   } else {
