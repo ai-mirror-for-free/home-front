@@ -6,6 +6,8 @@
     </template>
     <RouterView />
     <AppFooter />
+    <!-- 固定悬浮图标 -->
+    <FloatingIcons />
   </div>
 </template>
 
@@ -14,6 +16,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppNav from './components/AppNav.vue'
 import AppFooter from './components/AppFooter.vue'
+import FloatingIcons from './components/FloatingIcons.vue'
 
 const route = useRoute()
 

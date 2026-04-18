@@ -1,139 +1,175 @@
 <template>
   <div class="admin-container">
     <header class="admin-header">
-      <h1>管理员后台 - 兑换码管理</h1>
+      <h1>管理员后台 - 激活码管理</h1>
       <button @click="logout" class="logout-btn">退出登录</button>
     </header>
 
     <main class="admin-main">
-      <!-- 生成兑换码表单 -->
+      <!-- 批量生成激活码 -->
       <section class="generate-section">
-        <h2>生成兑换码</h2>
+        <h2>批量生成激活码</h2>
         <form @submit.prevent="generateCodes" class="generate-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="count">生成数量：</label>
+              <label for="admin-username">管理员账号：</label>
               <input
-                id="count"
-                v-model.number="generateForm.count"
-                type="number"
-                min="1"
-                max="1000"
-                placeholder="输入生成数量(最多1000)"
+                id="admin-username"
+                v-model="adminAuth.username"
+                type="text"
+                placeholder="请输入管理员账号"
                 required
               />
             </div>
             <div class="form-group">
-              <label for="plan">套餐类型：</label>
-              <select id="plan" v-model="generateForm.plan" required>
-                <option value="">请选择套餐类型</option>
-                <option value="vip">VIP</option>
-                <option value="svip">SVIP</option>
-                <option value="至尊版">至尊版</option>
-              </select>
+              <label for="admin-password">管理员密码：</label>
+              <input
+                id="admin-password"
+                v-model="adminAuth.password"
+                type="password"
+                placeholder="请输入管理员密码"
+                required
+              />
             </div>
           </div>
+
+          <!-- 任务列表 -->
+          <div class="tasks-section">
+            <div class="tasks-header">
+              <h3>生成任务</h3>
+              <button type="button" @click="addTask" class="add-task-btn">+ 添加任务</button>
+            </div>
+            
+            <div class="tasks-list">
+              <div v-for="(task, index) in tasks" :key="index" class="task-item">
+                <div class="task-inputs">
+                  <div class="form-group">
+                    <label :for="`plan-${index}`">套餐类型：</label>
+                    <select :id="`plan-${index}`" v-model="task.plan" required>
+                      <option value="">请选择</option>
+                      <option value="default">Default</option>
+                      <option value="vip">VIP</option>
+                      <option value="svip">SVIP</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label :for="`days-${index}`">天数：</label>
+                    <select :id="`days-${index}`" v-model="task.days" required>
+                      <option value="">请选择</option>
+                      <option value="1">1天</option>
+                      <option value="7">7天</option>
+                      <option value="30">30天</option>
+                      <option value="90">90天</option>
+                      <option value="180">180天</option>
+                      <option value="365">365天</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label :for="`count-${index}`">数量：</label>
+                    <input
+                      :id="`count-${index}`"
+                      v-model.number="task.count"
+                      type="number"
+                      min="1"
+                      max="1000"
+                      placeholder="数量"
+                      required
+                    />
+                  </div>
+                </div>
+                <button type="button" @click="removeTask(index)" class="remove-task-btn" v-if="tasks.length > 1">删除</button>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" :disabled="generateLoading" class="generate-btn">
-            {{ generateLoading ? '生成中...' : '生成兑换码' }}
+            {{ generateLoading ? '生成中...' : '批量生成激活码' }}
           </button>
         </form>
-      </section>
 
-      <!-- 搜索过滤条件 -->
-      <section class="filter-section">
-        <h2>搜索过滤</h2>
-        <div class="filter-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="filter-plan">套餐类型：</label>
-              <select id="filter-plan" v-model="filterForm.plan">
-                <option value="">全部</option>
-                <option value="vip">VIP</option>
-                <option value="svip">SVIP</option>
-                <option value="至尊版">至尊版</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="filter-exchanged">是否已兑换：</label>
-              <select id="filter-exchanged" v-model="filterForm.is_exchanged">
-                <option value="">全部</option>
-                <option value="true">是</option>
-                <option value="false">否</option>
-              </select>
+        <!-- 生成结果展示 -->
+        <div v-if="generatedCodes.length > 0" class="generated-result">
+          <h3>生成的激活码（共 {{ generatedCodes.length }} 个）</h3>
+          <div class="codes-container">
+            <div v-for="code in generatedCodes" :key="code.code" class="code-item">
+              <span class="code-text">{{ code.code }}</span>
+              <button @click="copyCode(code.code)" class="copy-btn">复制</button>
             </div>
           </div>
-          <button @click="loadRedemptionCodes" class="search-btn">搜索</button>
+          <button @click="copyAllCodes" class="copy-all-btn">复制全部</button>
         </div>
       </section>
 
-      <!-- 兑换码列表 -->
-      <section class="codes-list">
-        <h2>兑换码列表</h2>
-        <div class="table-actions">
-          <button @click="selectAll" class="action-btn">全选</button>
-          <button @click="deleteSelected" :disabled="!selectedIds.length" class="action-btn delete-btn">
-            删除选中({{ selectedIds.length }})
+      <!-- 激活码统计 -->
+      <section class="stats-section">
+        <h2>激活码统计</h2>
+        <div class="stats-actions">
+          <button @click="loadStats" :disabled="statsLoading" class="refresh-btn">
+            {{ statsLoading ? '加载中...' : '刷新统计' }}
           </button>
-          <div class="pagination">
-            <span>每页显示：</span>
-            <select v-model="pagination.limit" @change="loadRedemptionCodes">
-              <option :value="10">10</option>
-              <option :value="20">20</option>
-              <option :value="50">50</option>
-            </select>
-            <span>{{ pagination.offset + 1 }} - {{ Math.min(pagination.offset + pagination.limit, redemptionCodes.total) }} 条，共 {{ redemptionCodes.total }} 条</span>
-            <button @click="prevPage" :disabled="pagination.offset === 0" class="page-btn">上一页</button>
-            <button @click="nextPage" :disabled="pagination.offset + pagination.limit >= redemptionCodes.total" class="page-btn">下一页</button>
+        </div>
+
+        <div v-if="statsData.stats && statsData.stats.length > 0" class="stats-content">
+          <!-- 汇总数据 -->
+          <div class="summary-cards">
+            <div class="summary-card total">
+              <div class="card-label">总数量</div>
+              <div class="card-value">{{ statsData.summary?.total || 0 }}</div>
+            </div>
+            <div class="summary-card used">
+              <div class="card-label">已使用</div>
+              <div class="card-value">{{ statsData.summary?.used || 0 }}</div>
+            </div>
+            <div class="summary-card available">
+              <div class="card-label">剩余可用</div>
+              <div class="card-value">{{ statsData.summary?.available || 0 }}</div>
+            </div>
+          </div>
+
+          <!-- 详细统计表格 -->
+          <div class="stats-table-container">
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>套餐类型</th>
+                  <th>天数</th>
+                  <th>总数量</th>
+                  <th>已使用</th>
+                  <th>剩余可用</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(stat, index) in statsData.stats" :key="index">
+                  <td>
+                    <span :class="['plan-badge', stat.plan_level]">{{ getPlanName(stat.plan_level) }}</span>
+                  </td>
+                  <td>{{ stat.days }}天</td>
+                  <td>{{ stat.total }}</td>
+                  <td>{{ stat.used }}</td>
+                  <td>{{ stat.available }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div class="table-container">
-          <table class="codes-table">
-            <thead>
-              <tr>
-                <th width="50"><input type="checkbox" @change="selectAll" :checked="areAllSelected" /></th>
-                <th>ID</th>
-                <th>兑换码</th>
-                <th>套餐类型</th>
-                <th>是否已兑换</th>
-                <th>关联用户</th>
-                <th>创建时间</th>
-                <th>兑换时间</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="code in redemptionCodes.data" :key="code.id">
-                <td><input type="checkbox" :value="code.id" v-model="selectedIds" /></td>
-                <td>{{ code.id }}</td>
-                <td>{{ code.exchange_code }}</td>
-                <td>{{ code.plan }}</td>
-                <td>
-                  <span :class="{ 'status-yes': code.is_exchange, 'status-no': !code.is_exchange }">
-                    {{ code.is_exchange ? '是' : '否' }}
-                  </span>
-                </td>
-                <td>{{ code.user_id || '-' }}</td>
-                <td>{{ formatDate(code.created_time) }}</td>
-                <td>{{ code.exchange_time ? formatDate(code.exchange_time) : '-' }}</td>
-              </tr>
-              <tr v-if="redemptionCodes.data.length === 0">
-                <td colspan="8" class="no-data">暂无数据</td>
-              </tr>
-            </tbody>
-          </table>
+        <div v-else-if="!statsLoading" class="no-stats">
+          暂无统计数据
         </div>
       </section>
     </main>
+
+    <!-- 复制成功提示 -->
+    <div v-if="showCopyTip" class="copy-tip">复制成功！</div>
   </div>
 </template>
 
 <script>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { 
-  getRedemptionCodes, 
-  generateRedemptionCodes, 
-  deleteRedemptionCodes,
+  generateActivationCodes, 
+  getActivationCodesStats,
   adminLogout
 } from '@/api/admin'
 
@@ -142,146 +178,149 @@ export default {
   setup() {
     const router = useRouter()
     
-    // 生成兑换码表单数据
-    const generateForm = reactive({
-      count: 10,
-      plan: ''
+    // 管理员认证信息
+    const adminAuth = reactive({
+      username: '',
+      password: ''
     })
     
-    // 过滤条件
-    const filterForm = reactive({
-      plan: '',
-      is_exchanged: ''
-    })
-    
-    // 分页信息
-    const pagination = reactive({
-      limit: 20,
-      offset: 0
-    })
-    
-    // 兑换码列表数据
-    const redemptionCodes = ref({
-      data: [],
-      total: 0,
-      limit: 0,
-      offset: 0
-    })
+    // 生成任务列表
+    const tasks = ref([
+      { plan: '', days: '', count: 10 }
+    ])
     
     // 加载状态
     const generateLoading = ref(false)
+    const statsLoading = ref(false)
     
-    // 选中的兑换码ID
-    const selectedIds = ref([])
+    // 生成结果
+    const generatedCodes = ref([])
     
-    // 加载兑换码列表
-    const loadRedemptionCodes = async () => {
-      try {
-        const params = {
-          limit: pagination.limit,
-          offset: pagination.offset,
-          ...(filterForm.plan && { plan: filterForm.plan }),
-          ...(filterForm.is_exchanged !== '' && { is_exchanged: filterForm.is_exchanged === 'true' })
-        }
-        
-        const response = await getRedemptionCodes(params)
-        redemptionCodes.value = response
-      } catch (error) {
-        console.error('获取兑换码列表失败:', error)
-        alert(error.response?.data?.message || error.message || '获取兑换码列表失败')
+    // 统计数据
+    const statsData = ref({
+      stats: [],
+      summary: {}
+    })
+    
+    // 复制提示
+    const showCopyTip = ref(false)
+    
+    // 添加任务
+    const addTask = () => {
+      tasks.value.push({ plan: '', days: '', count: 10 })
+    }
+    
+    // 删除任务
+    const removeTask = (index) => {
+      if (tasks.value.length > 1) {
+        tasks.value.splice(index, 1)
       }
     }
     
-    // 生成兑换码
+    // 生成激活码
     const generateCodes = async () => {
-      if (!generateForm.count || generateForm.count <= 0 || generateForm.count > 1000) {
-        alert('请输入正确的数量(1-1000)')
+      if (!adminAuth.username || !adminAuth.password) {
+        alert('请输入管理员账号和密码')
         return
       }
       
-      if (!generateForm.plan) {
-        alert('请选择套餐类型')
+      // 验证任务列表
+      const validTasks = tasks.value.filter(task => task.plan && task.days && task.count > 0)
+      if (validTasks.length === 0) {
+        alert('请至少添加一个有效的任务')
         return
       }
       
       generateLoading.value = true
+      generatedCodes.value = []
       
       try {
-        const response = await generateRedemptionCodes(generateForm)
-        alert(`成功生成 ${response.count} 个${response.plan}套餐兑换码！`)
-        // 重新加载列表
-        loadRedemptionCodes()
-        // 重置表单
-        generateForm.count = 10
-        generateForm.plan = ''
+        // 构建请求数据
+        const requestData = {
+          username: adminAuth.username,
+          password: adminAuth.password,
+          tasks: validTasks.map(task => [task.plan, parseInt(task.days), task.count])
+        }
+        
+        const response = await generateActivationCodes(requestData)
+        
+        // 保存生成的激活码
+        if (response.codes && response.codes.length > 0) {
+          generatedCodes.value = response.codes
+          alert(`成功生成 ${response.total_generated} 个激活码！`)
+        } else {
+          alert('生成完成，但没有返回激活码列表')
+        }
+        
+        // 清空任务列表
+        tasks.value = [{ plan: '', days: '', count: 10 }]
       } catch (error) {
-        console.error('生成兑换码失败:', error)
-        alert(error.response?.data?.message || error.message || '生成兑换码失败')
+        console.error('生成激活码失败:', error)
+        alert(error.response?.data?.message || error.message || '生成激活码失败')
       } finally {
         generateLoading.value = false
       }
     }
     
-    // 删除选中的兑换码
-    const deleteSelected = async () => {
-      if (!selectedIds.value.length) {
-        alert('请先选择要删除的兑换码')
+    // 复制单个激活码
+    const copyCode = async (code) => {
+      try {
+        await navigator.clipboard.writeText(code)
+        showCopyTip.value = true
+        setTimeout(() => {
+          showCopyTip.value = false
+        }, 2000)
+      } catch (error) {
+        console.error('复制失败:', error)
+      }
+    }
+    
+    // 复制所有激活码
+    const copyAllCodes = async () => {
+      const allCodes = generatedCodes.value.map(c => c.code).join('\n')
+      try {
+        await navigator.clipboard.writeText(allCodes)
+        showCopyTip.value = true
+        setTimeout(() => {
+          showCopyTip.value = false
+        }, 2000)
+      } catch (error) {
+        console.error('复制失败:', error)
+      }
+    }
+    
+    // 加载统计数据
+    const loadStats = async () => {
+      if (!adminAuth.username || !adminAuth.password) {
+        alert('请先在生成激活码表单中输入管理员账号和密码')
         return
       }
       
-      if (!confirm(`确定要删除选中的 ${selectedIds.value.length} 个兑换码吗？此操作不可撤销！`)) {
-        return
-      }
+      statsLoading.value = true
       
       try {
-        await deleteRedemptionCodes(selectedIds.value)
-        alert('删除成功！')
-        // 重置选中状态
-        selectedIds.value = []
-        // 重新加载列表
-        loadRedemptionCodes()
+        const response = await getActivationCodesStats({
+          username: adminAuth.username,
+          password: adminAuth.password
+        })
+        
+        statsData.value = response
       } catch (error) {
-        console.error('删除兑换码失败:', error)
-        alert(error.response?.data?.message || error.message || '删除兑换码失败')
+        console.error('获取统计数据失败:', error)
+        alert(error.response?.data?.message || error.message || '获取统计数据失败')
+      } finally {
+        statsLoading.value = false
       }
     }
     
-    // 全选/取消全选
-    const selectAll = () => {
-      if (areAllSelected.value) {
-        selectedIds.value = []
-      } else {
-        selectedIds.value = redemptionCodes.value.data.map(code => code.id)
+    // 获取套餐名称
+    const getPlanName = (plan) => {
+      const planNames = {
+        'default': 'Default',
+        'vip': 'VIP',
+        'svip': 'SVIP'
       }
-    }
-    
-    // 是否全选
-    const areAllSelected = computed(() => {
-      return redemptionCodes.value.data.length > 0 && 
-             selectedIds.value.length === redemptionCodes.value.data.length
-    })
-    
-    // 上一页
-    const prevPage = () => {
-      if (pagination.offset > 0) {
-        pagination.offset -= pagination.limit
-        loadRedemptionCodes()
-      }
-    }
-    
-    // 下一页
-    const nextPage = () => {
-      if (pagination.offset + pagination.limit < redemptionCodes.value.total) {
-        pagination.offset += pagination.limit
-        loadRedemptionCodes()
-      }
-    }
-    
-    // 格式化日期
-    const formatDate = (dateString) => {
-      if (!dateString) return '-'
-      const date = new Date(dateString)
-      return date.toLocaleString('zh-CN')
+      return planNames[plan] || plan
     }
     
     // 退出登录
@@ -298,24 +337,34 @@ export default {
         return
       }
       
-      loadRedemptionCodes()
+      // 从 localStorage 读取之前保存的管理员认证信息
+      const savedAuth = localStorage.getItem('adminAuth')
+      if (savedAuth) {
+        try {
+          const auth = JSON.parse(savedAuth)
+          adminAuth.username = auth.username || ''
+          adminAuth.password = auth.password || ''
+        } catch (e) {
+          console.error('解析保存的认证信息失败:', e)
+        }
+      }
     })
     
     return {
-      generateForm,
-      filterForm,
-      pagination,
-      redemptionCodes,
+      adminAuth,
+      tasks,
       generateLoading,
-      selectedIds,
-      loadRedemptionCodes,
+      statsLoading,
+      generatedCodes,
+      statsData,
+      showCopyTip,
+      addTask,
+      removeTask,
       generateCodes,
-      deleteSelected,
-      selectAll,
-      areAllSelected,
-      prevPage,
-      nextPage,
-      formatDate,
+      copyCode,
+      copyAllCodes,
+      loadStats,
+      getPlanName,
       logout
     }
   }
@@ -366,7 +415,7 @@ export default {
   margin: 0 auto;
 }
 
-.generate-section, .filter-section, .codes-list {
+.generate-section, .stats-section {
   background: #ffffff;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -375,7 +424,7 @@ export default {
   border: 1px solid #e2e8f0;
 }
 
-.generate-section h2, .filter-section h2, .codes-list h2 {
+.generate-section h2, .stats-section h2 {
   margin-top: 0;
   margin-bottom: 1.2rem;
   color: #2d3748;
@@ -423,7 +472,7 @@ export default {
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.generate-btn, .search-btn {
+.generate-btn {
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #56ccf2 0%, #2f80ed 100%);
   color: white;
@@ -433,9 +482,10 @@ export default {
   font-size: 1rem;
   font-weight: 600;
   transition: transform 0.2s;
+  margin-top: 1rem;
 }
 
-.generate-btn:hover:not(:disabled), .search-btn:hover {
+.generate-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(47, 128, 237, 0.3);
 }
@@ -446,21 +496,27 @@ export default {
   transform: none;
 }
 
-.table-actions {
+/* 任务列表样式 */
+.tasks-section {
+  margin-bottom: 1.5rem;
+}
+
+.tasks-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 1rem;
-  background-color: #f8fafc;
-  border-radius: 6px;
+  margin-bottom: 1rem;
 }
 
-.action-btn {
-  padding: 0.6rem 1rem;
-  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+.tasks-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #4a5568;
+}
+
+.add-task-btn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
   color: white;
   border: none;
   border-radius: 4px;
@@ -469,128 +525,272 @@ export default {
   transition: transform 0.2s;
 }
 
-.action-btn:hover {
+.add-task-btn:hover {
   transform: translateY(-2px);
 }
 
-.delete-btn {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.delete-btn:hover {
-  transform: translateY(-2px);
-}
-
-.delete-btn:disabled {
-  background: #a0aec0;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.pagination {
+.tasks-list {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.task-inputs {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
   flex-wrap: wrap;
 }
 
-.pagination span {
-  color: #4a5568;
-  font-weight: 500;
+.task-inputs .form-group {
+  min-width: 150px;
+  flex: 1;
 }
 
-.pagination select {
-  padding: 0.5rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 4px;
-  background-color: #ffffff;
-  color: #1a202c;
-}
-
-.page-btn {
+.remove-task-btn {
   padding: 0.5rem 1rem;
-  margin-left: 0.5rem;
-  background: #edf2f7;
-  border: 2px solid #e2e8f0;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
-  color: #2d3748;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: transform 0.2s;
 }
 
-.page-btn:hover:not(:disabled) {
-  background: #e2e8f0;
-  border-color: #cbd5e0;
+.remove-task-btn:hover {
+  transform: translateY(-2px);
 }
 
-.page-btn:disabled {
-  color: #a0aec0;
-  background: #f7fafc;
+/* 生成结果样式 */
+.generated-result {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f0fff4;
+  border-radius: 8px;
+  border: 2px solid #68d391;
+}
+
+.generated-result h3 {
+  margin-top: 0;
+  color: #276749;
+  font-size: 1rem;
+}
+
+.codes-container {
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 1rem 0;
+}
+
+.code-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: #ffffff;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.code-text {
+  font-family: monospace;
+  color: #2d3748;
+}
+
+.copy-btn {
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: transform 0.2s;
+}
+
+.copy-btn:hover {
+  transform: scale(1.05);
+}
+
+.copy-all-btn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform 0.2s;
+}
+
+.copy-all-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* 统计部分样式 */
+.stats-actions {
+  margin-bottom: 1.5rem;
+}
+
+.refresh-btn {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform 0.2s;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.refresh-btn:disabled {
+  background: #cbd5e0;
   cursor: not-allowed;
-  transform: none;
 }
 
-.table-container {
+.summary-cards {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  flex: 1;
+  min-width: 150px;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.summary-card.total {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.summary-card.used {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.summary-card.available {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.card-label {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.card-value {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.stats-table-container {
   overflow-x: auto;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
 }
 
-.codes-table {
+.stats-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 800px;
   background: #ffffff;
 }
 
-.codes-table th,
-.codes-table td {
+.stats-table th,
+.stats-table td {
   padding: 0.85rem;
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
   color: #2d3748;
 }
 
-.codes-table th {
+.stats-table th {
   background: #f7fafc;
   color: #2d3748;
   font-weight: 600;
-  position: sticky;
-  top: 0;
   border-bottom: 2px solid #e2e8f0;
 }
 
-.codes-table tbody tr:nth-child(even) {
-  background-color: #f8fafc;
+.stats-table tbody tr:hover {
+  background-color: #f7fafc;
 }
 
-.codes-table tbody tr:hover {
-  background-color: #ebf8ff;
-}
-
-.status-yes {
-  color: #27ae60;
-  font-weight: bold;
-  background-color: #d4edda;
-  padding: 0.25rem 0.5rem;
+.plan-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
   border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
-.status-no {
-  color: #e74c3c;
-  font-weight: bold;
-  background-color: #fcf4f4;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+.plan-badge.default {
+  background-color: #e2e8f0;
+  color: #4a5568;
 }
 
-.no-data {
+.plan-badge.vip {
+  background-color: #fed7d7;
+  color: #c53030;
+}
+
+.plan-badge.svip {
+  background-color: #feebc8;
+  color: #c05621;
+}
+
+.no-stats {
   text-align: center;
   color: #718096;
   font-style: italic;
   padding: 2rem;
   font-size: 1.1rem;
-  font-weight: 500;
+}
+
+/* 复制提示 */
+.copy-tip {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  z-index: 1000;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 </style>

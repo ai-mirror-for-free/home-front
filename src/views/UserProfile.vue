@@ -49,14 +49,11 @@
             
             <div class="subscription-actions">
               <button @click="goToOpenWebUI" class="btn btn-primary">
-                访问 OpenWebUI
+                开始聊天
               </button>
-              <RouterLink to="/renewal" class="btn btn-outline">
-                续费套餐
-              </RouterLink>
-              <RouterLink to="/buy-new" class="btn btn-outline">
-                购买新套餐
-              </RouterLink>
+              <a href="https://h5.m.taobao.com/awp/core/detail.htm?ft=t&id=1044843692829" class="btn btn-outline">
+                购买套餐
+              </a>
             </div>
             
             <!-- 兑换码兑换区域 -->
@@ -73,7 +70,7 @@
                     id="redemption-code"
                     v-model="redemptionCode"
                     type="text"
-                    placeholder="请输入16位兑换码"
+                    placeholder="在此输入兑换码"
                     class="form-input"
                     :disabled="redemptionLoading"
                   />
@@ -117,28 +114,22 @@
                 <span class="quota-label">套餐级别</span>
                 <span class="quota-value quota-plan">{{ formatPlanLevel(quotaInfo.plan_level) }}</span>
               </div>
-              <div class="quota-item" v-if="quotaInfo.expired_time">
-                <span class="quota-label">额度过期时间</span>
-                <span class="quota-value">{{ formatExpiredTime(quotaInfo.expired_time) }}</span>
+              <div class="quota-item">
+                <span class="quota-label">额度使用</span>
+                <div class="quota-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: quotaUsedPercentage + '%' }"></div>
+                  </div>
+                  <span class="quota-percentage">{{ quotaUsedPercentage }}%</span>
+                </div>
               </div>
             </div>
             
             <div class="model-limits" v-if="quotaInfo.model_limits">
               <div class="model-limits-header">
                 <span class="model-limits-title">可用模型列表</span>
-                <button 
-                  @click="toggleModelList" 
-                  class="model-toggle-btn"
-                  :class="{ 'expanded': isModelListExpanded }"
-                >
-                  {{ isModelListExpanded ? '收起' : '展开' }} 
-                  <span class="toggle-icon" :class="{ 'rotated': isModelListExpanded }">▼</span>
-                </button>
               </div>
-              <div 
-                class="model-list-wrapper" 
-                :class="{ 'expanded': isModelListExpanded, 'collapsed': !isModelListExpanded }"
-              >
+              <div class="model-list-wrapper expanded">
                 <div class="model-list">
                   <div 
                     v-for="(model, index) in modelLimitsArray" 
@@ -149,46 +140,11 @@
                   </div>
                 </div>
               </div>
-              <div 
-                v-show="!isModelListExpanded && modelLimitsArray.length > 6" 
-                class="model-count-indicator"
-              >
-                +{{ modelLimitsArray.length - 6 }} 个模型
-              </div>
             </div>
           </div>
         </div>
 
       </div>
-    </div>
-    
-    <!-- 悬浮客服按钮 -->
-    <div class="floating-support">
-      <div class="support-dropdown" :class="{ 'active': isSupportDropdownVisible }">
-        <a :href="supportOptions[0].link" target="_blank" class="dropdown-item">
-          <div class="dropdown-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16Z" fill="var(--accent-green)"/>
-              <path d="M12 6C11.45 6 11 6.45 11 7C11 7.55 11.45 8 12 8C12.55 8 13 7.55 13 7C13 6.45 12.55 6 12 6ZM15 8C14.45 8 14 8.45 14 9C14 9.55 14.45 10 15 10C15.55 10 16 9.55 16 9C16 8.45 15.55 8 15 8ZM9 8C8.45 8 8 8.45 8 9C8 9.55 8.45 10 9 10C9.55 10 10 9.55 10 9C10 8.45 9.55 8 9 8Z" fill="var(--accent-green)"/>
-            </svg>
-          </div>
-          <span>{{ supportOptions[0].title }}</span>
-        </a>
-        <a :href="supportOptions[1].link" target="_blank" class="dropdown-item">
-          <div class="dropdown-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="var(--accent-blue)"/>
-            </svg>
-          </div>
-          <span>{{ supportOptions[1].title }}</span>
-        </a>
-      </div>
-      <button class="support-toggle" @click="toggleSupportDropdown">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2Z" fill="var(--accent-cyan)"/>
-          <path d="M11 17V11H13V17H11ZM11 9V7H13V9H11Z" fill="white"/>
-        </svg>
-      </button>
     </div>
   </div>
 </template>
@@ -198,11 +154,13 @@ import { computed, ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { updateUserQuota } from '@/api/register'
 import { redeemCode } from '@/api/admin' // 假设redeemCode函数在admin.js中
+import axios from 'axios'
+
+const API_BASE_URL = '/api'
 
 const userStore = useUserStore()
 const isSupportDropdownVisible = ref(false)
 const loadingQuota = ref(false)
-const isModelListExpanded = ref(false)
 
 // 新增兑换码相关变量
 const redemptionCode = ref('')
@@ -254,6 +212,15 @@ const modelLimitsArray = computed(() => {
   return quotaInfo.value.model_limits.split(',').map(model => model.trim()).filter(model => model)
 })
 
+// 计算额度使用百分比
+const quotaUsedPercentage = computed(() => {
+  const used = quotaInfo.value.used_quota || 0
+  const remain = quotaInfo.value.remain_quota || 0
+  const total = used + remain
+  if (total === 0) return 0
+  return Math.round((used / total) * 100)
+})
+
 // 格式化套餐级别
 const formatPlanLevel = (planLevel) => {
   const planMap = {
@@ -295,11 +262,6 @@ const toggleSupportDropdown = () => {
   isSupportDropdownVisible.value = !isSupportDropdownVisible.value
 }
 
-// 切换模型列表展开/收起状态
-const toggleModelList = () => {
-  isModelListExpanded.value = !isModelListExpanded.value
-}
-
 // 新增函数：跳转到OpenWebUI
 const goToOpenWebUI = () => {
   const token = userStore.getToken();
@@ -339,6 +301,37 @@ const fetchUserQuota = async () => {
   }
 }
 
+// 获取Banner配置
+const fetchBanners = async () => {
+  try {
+    const token = userStore.getToken()
+    if (!token) {
+      console.warn('无法获取Banner：用户未登录或缺少token')
+      return
+    }
+
+    const response = await axios.get(`${API_BASE_URL}/v1/configs/banners`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    console.log('Banner配置获取成功:', response.data)
+    // 可以将banner数据存储到响应式变量中以便在模板中使用
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      console.warn('Token已过期或无效，正在退出登录...')
+      // 清空localStorage中的所有信息
+      localStorage.clear()
+      // 调用store的logout方法
+      userStore.logout()
+      // 可以选择重定向到登录页
+      window.location.href = '/login'
+    } else {
+      console.error('获取Banner配置失败:', error.message)
+    }
+  }
+}
+
 // 兑换码兑换处理函数
 const handleRedeemCode = async () => {
   if (!redemptionCode.value) {
@@ -351,9 +344,23 @@ const handleRedeemCode = async () => {
   redemptionMessage.value = '';
   
   try {
+    // 从 localStorage 获取保存的用户凭据
+    const savedCredentials = localStorage.getItem('userCredentials')
+    let credentials = { username: '', email: '', password: '' }
+    
+    if (savedCredentials) {
+      try {
+        credentials = JSON.parse(savedCredentials)
+      } catch (e) {
+        console.error('解析保存的凭据失败:', e)
+      }
+    }
+    
     const response = await redeemCode({
       code: redemptionCode.value,
-      email: userInfo.value.email // 使用当前用户的邮箱
+      username: credentials.username || userInfo.value.name,
+      email: credentials.email || userInfo.value.email,
+      password: credentials.password
     });
 
     // 成功兑换后显示消息
@@ -378,6 +385,7 @@ const handleRedeemCode = async () => {
 onMounted(() => {
   if (userStore.state.isLoggedIn) {
     fetchUserQuota()
+    fetchBanners()
   }
 })
 </script>
@@ -723,6 +731,36 @@ onMounted(() => {
   text-transform: capitalize;
 }
 
+.quota-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-accent);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.quota-percentage {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent-cyan);
+  min-width: 45px;
+  text-align: right;
+}
+
 .model-limits {
   margin-top: 20px;
 }
@@ -738,35 +776,6 @@ onMounted(() => {
   color: var(--text-primary);
   font-weight: 600;
   font-size: 1.1rem;
-}
-
-.model-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: var(--accent-cyan);
-  cursor: pointer;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  transition: background-color 0.2s;
-}
-
-.model-toggle-btn:hover {
-  background-color: rgba(56, 189, 248, 0.1);
-}
-
-.toggle-icon {
-  display: inline-block;
-  transition: transform 0.3s ease;
-  font-size: 0.7rem;
-  transform-origin: center;
-}
-
-.toggle-icon.rotated {
-  transform: rotate(180deg);
 }
 
 .model-list-wrapper {

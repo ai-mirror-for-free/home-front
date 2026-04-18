@@ -12,7 +12,7 @@
       <div class="container hero-content">
         <div class="hero-badge">
           <span class="badge-dot"></span>
-          <span>全新发布 — GPT-5、Claude 4.7、Gemini Ultra 现已上线</span>
+          <span>全新发布 — xAI、Anthropic、Gemini、OpenAI 国际顶级模型现已上线</span>
         </div>
 
         <h1 class="hero-title">
@@ -21,7 +21,7 @@
         </h1>
 
         <p class="hero-desc">
-          一个账号，畅享 GPT-4、Claude、Gemini、DeepSeek 等数十款顶尖大模型。
+          一个账号，畅享 GPT、Claude、Gemini、Grok 等数十款顶尖大模型。
           无需翻墙，按需付费，即刻开始你的 AI 之旅。
         </p>
 
@@ -35,13 +35,8 @@
 
         <div class="hero-stats">
           <div class="stat">
-            <span class="stat-num">50+</span>
+            <span class="stat-num">10+</span>
             <span class="stat-label">AI 模型</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat">
-            <span class="stat-num">10万+</span>
-            <span class="stat-label">活跃用户</span>
           </div>
           <div class="stat-divider"></div>
           <div class="stat">
@@ -110,7 +105,7 @@
         </div>
 
         <div style="text-align:center;margin-top:48px">
-          <RouterLink to="/models" class="btn btn-outline btn-lg">查看全部 50+ 模型</RouterLink>
+          <RouterLink to="/models" class="btn btn-outline btn-lg">查看全部 10+ 模型</RouterLink>
         </div>
       </div>
     </section>
@@ -120,7 +115,7 @@
       <div class="container">
         <div class="section-header">
           <span class="tag tag-purple">功能特性</span>
-          <h2 class="section-title">为什么选择 NexusAI</h2>
+          <h2 class="section-title">为什么选择 chat-keeper</h2>
         </div>
 
         <div class="features-grid">
@@ -131,6 +126,49 @@
             <h3>{{ f.title }}</h3>
             <p>{{ f.desc }}</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical Documentation -->
+    <section class="section docs-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="tag tag-purple">技术文档</span>
+          <h2 class="section-title">高级特性与自定义</h2>
+          <p class="section-desc">我们建议您使用默认聊天界面即可满足大部分需求。如果您有自定义的需求，可以参考以下信息自行调整。</p>
+        </div>
+
+        <div class="docs-grid">
+          <a href="https://docs.openwebui.com/features/workspace/prompts" target="_blank" class="doc-card card">
+            <div class="doc-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <div class="doc-content">
+              <h3>高级系统提示词</h3>
+              <p>了解如何自定义系统提示词，打造专属的 AI 助手行为和角色设定。</p>
+              <span class="doc-link">查看文档 →</span>
+            </div>
+          </a>
+
+          <a href="https://docs.openwebui.com/features/workspace/skills/" target="_blank" class="doc-card card">
+            <div class="doc-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <div class="doc-content">
+              <h3>如何使用 Skills</h3>
+              <p>学习使用 Skills 扩展 AI 能力，实现自动化任务和高级功能集成。</p>
+              <span class="doc-link">查看文档 →</span>
+            </div>
+          </a>
         </div>
       </div>
     </section>
@@ -150,27 +188,6 @@
         </div>
       </div>
     </section>
-
-    <!-- FAQ Section -->
-    <section class="section" id="faq">
-      <div class="container">
-        <div class="section-header">
-          <span class="tag tag-green">常见问题</span>
-          <h2 class="section-title">你可能想了解的</h2>
-        </div>
-        <div class="faq-list">
-          <div v-for="(faq, i) in faqs" :key="i" class="faq-item" @click="toggleFaq(i)">
-            <div class="faq-q">
-              <span>{{ faq.q }}</span>
-              <svg class="faq-arrow" :class="{ open: openFaq === i }" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-            </div>
-            <div class="faq-a" :class="{ open: openFaq === i }">
-              <p>{{ faq.a }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 </template>
 
@@ -178,12 +195,11 @@
 import { ref } from 'vue'
 
 const orbitModels = [
-  { name: 'GPT-4o', icon: '🤖' },
+  { name: 'GPT', icon: '🤖' },
   { name: 'Claude', icon: '🧠' },
   { name: 'Gemini', icon: '💫' },
-  { name: 'DeepSeek', icon: '🔍' },
+  { name: 'xAI', icon: '🔥' },
   { name: 'Llama', icon: '🦙' },
-  { name: 'Mistral', icon: '⚡' },
 ]
 
 function orbitStyle(index, total) {
@@ -200,7 +216,7 @@ function orbitStyle(index, total) {
 
 const featuredModels = [
   {
-    id: 1, provider: 'OpenAI', name: 'GPT-5',
+    id: 1, provider: 'OpenAI', name: 'GPT-5.4',
     emoji: '🤖', gradient: 'linear-gradient(135deg,#10a37f,#1a7f64)',
     tag: '多模态', tagClass: 'tag-green',
     desc: '最强大的多模态模型，支持文字、图像、语音理解与生成，处理复杂任务游刃有余。',
@@ -208,7 +224,7 @@ const featuredModels = [
     ctx: '128K 上下文'
   },
   {
-    id: 2, provider: 'Anthropic', name: 'Claude 4.7',
+    id: 2, provider: 'Anthropic', name: 'Claude Opus 4.6',
     emoji: '🧠', gradient: 'linear-gradient(135deg,#d97706,#92400e)',
     tag: '推理强', tagClass: 'tag-purple',
     desc: '专注于安全与深度推理，超长上下文处理能力卓越，适合文档分析与复杂逻辑任务。',
@@ -224,12 +240,12 @@ const featuredModels = [
     ctx: '1M 上下文'
   },
   {
-    id: 4, provider: 'DeepSeek', name: 'DeepSeek-V3',
-    emoji: '🔍', gradient: 'linear-gradient(135deg,#6366f1,#4338ca)',
-    tag: '开源', tagClass: 'tag-purple',
-    desc: '国产顶级开源大模型，中文理解能力极强，数学与代码能力媲美顶级闭源模型。',
-    caps: ['中文优化', '数学', '代码', '推理'],
-    ctx: '64K 上下文'
+    id: 4, provider: 'xAI', name: 'Grok 4.20',
+    emoji: '🔥', gradient: 'linear-gradient(135deg,#f97316,#c2410c)',
+    tag: '旗舰', tagClass: 'tag-orange',
+    desc: 'xAI 最新旗舰模型，深度推理能力卓越，实时信息获取能力强。',
+    caps: ['深度推理', '实时信息', '代码'],
+    ctx: '128K 上下文'
   },
   {
     id: 5, provider: 'Meta', name: 'Llama 3.1 405B',
@@ -240,12 +256,12 @@ const featuredModels = [
     ctx: '128K 上下文'
   },
   {
-    id: 6, provider: 'Mistral AI', name: 'Mistral Large 2',
-    emoji: '⚡', gradient: 'linear-gradient(135deg,#f97316,#c2410c)',
-    tag: '欧洲', tagClass: 'tag-green',
-    desc: '欧洲领先 AI 实验室出品，推理效率极高，特别适合企业级应用与 API 集成场景。',
-    caps: ['高效推理', '函数调用', '代码', '多语言'],
-    ctx: '128K 上下文'
+    id: 6, provider: 'Anthropic', name: 'Claude Sonnet 4.6',
+    emoji: '📝', gradient: 'linear-gradient(135deg,#b45309,#78350f)',
+    tag: '均衡', tagClass: 'tag-green',
+    desc: 'Anthropic 均衡旗舰，深度推理卓越，长文档处理能力出众。',
+    caps: ['推理', '文档', '创作', '代码'],
+    ctx: '200K 上下文'
   },
 ]
 
@@ -253,8 +269,8 @@ const features = [
   {
     icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
     iconBg: 'rgba(56,189,248,0.1)',
-    title: '毫秒级响应',
-    desc: '全球加速节点，多路由负载均衡，确保模型调用低延迟、高吞吐。'
+    title: '流畅响应体验',
+    desc: '多路由智能调度，确保模型调用稳定流畅，响应速度满足日常使用需求。'
   },
   {
     icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
@@ -271,8 +287,8 @@ const features = [
   {
     icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
     iconBg: 'rgba(56,189,248,0.1)',
-    title: '灵活计费方式',
-    desc: '按量计费 + 套餐订阅双模式，满足个人到企业的多样化需求，费用透明可控。'
+    title: '透明按量计费',
+    desc: '费用明细清晰透明，用多少付多少，无需预付，按月结算更省心。'
   },
   {
     icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
@@ -281,25 +297,11 @@ const features = [
     desc: '无缝集成 OpenWebUI，保留熟悉的交互界面，底层换装顶级模型，体验大幅提升。'
   },
   {
-    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
     iconBg: 'rgba(52,211,153,0.1)',
-    title: '7×24 技术支持',
-    desc: '专属客服团队全天候在线，快速响应使用问题，企业用户享有专属 SLA 保障。'
+    title: 'QQ 客服支持',
+    desc: '遇到问题可通过 QQ 联系客服，我们会在工作时段尽快回复解答。'
   }
-]
-
-const openFaq = ref(null)
-function toggleFaq(i) {
-  openFaq.value = openFaq.value === i ? null : i
-}
-
-const faqs = [
-  { q: '如何开始使用 NexusAI？', a: '注册账号后即可免费体验，无需信用卡。新用户赠送体验额度，可立即调用任意模型。升级订阅后获得更大额度和更快响应速度。' },
-  { q: '支持哪些支付方式？', a: '支持支付宝、微信支付、银行卡等多种国内支付方式，也支持 USDT 等数字货币支付，方便灵活。' },
-  { q: '数据隐私如何保障？', a: '所有对话均加密传输与存储，我们承诺不将用户对话数据用于模型训练。企业版支持私有化部署，数据完全自主可控。' },
-  { q: '能否自定义对接到我的业务系统？', a: '支持 OpenAI 兼容格式的 API，可无缝替换现有 AI 服务，同时提供专属 SDK 与详细接入文档，技术团队全程协助对接。' },
-  { q: '套餐额度用完后怎么办？', a: '套餐额度用完后自动切换至按量计费模式，不影响正常使用。也可随时升级套餐或购买额度包，续费操作简单便捷。' },
-  { q: '是否提供企业定制方案？', a: '针对企业用户，我们提供专属定价、私有化部署、合规审计、批量账号管理等服务，欢迎联系商务团队洽谈。' },
 ]
 </script>
 
@@ -509,6 +511,26 @@ const faqs = [
 .feature-card h3 { font-family: var(--font-display); font-size: 17px; font-weight: 700; }
 .feature-card p { color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
 
+/* DOCUMENTATION */
+.docs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 800px; margin: 0 auto; }
+.doc-card {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 24px; text-decoration: none;
+  transition: all 0.2s ease;
+}
+.doc-card:hover { transform: translateY(-2px); border-color: rgba(99,102,241,0.4); }
+.doc-icon {
+  width: 48px; height: 48px; flex-shrink: 0;
+  background: rgba(99,102,241,0.1);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent-purple);
+}
+.doc-content { display: flex; flex-direction: column; gap: 6px; }
+.doc-content h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); }
+.doc-content p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.doc-link { font-size: 13px; color: var(--accent-cyan); font-weight: 500; margin-top: 4px; }
+
 /* CTA */
 .cta-section { }
 .cta-box {
@@ -553,38 +575,13 @@ const faqs = [
   justify-content: center;
 }
 
-/* FAQ */
-.faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-.faq-item {
-  background: var(--gradient-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: var(--transition);
-  overflow: hidden;
-}
-.faq-item:hover { border-color: var(--border-glow); }
-.faq-q {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 24px;
-  font-weight: 500;
-  font-size: 15px;
-}
-.faq-arrow { transition: transform 0.3s ease; flex-shrink: 0; color: var(--text-muted); }
-.faq-arrow.open { transform: rotate(180deg); }
-.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
-.faq-a.open { max-height: 200px; }
-.faq-a p { padding: 0 24px 20px; color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
-
 /* Responsive */
 @media (max-width: 1024px) {
   .hero-visual { display: none; }
-  .models-grid, .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .models-grid, .features-grid, .docs-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 640px) {
-  .models-grid, .features-grid { grid-template-columns: 1fr; }
+  .models-grid, .features-grid, .docs-grid { grid-template-columns: 1fr; }
   .hero-stats { gap: 20px; }
   .cta-box { padding: 48px 24px; }
 }

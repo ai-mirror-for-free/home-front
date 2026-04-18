@@ -16,22 +16,15 @@
               </linearGradient>
             </defs>
           </svg>
-          <span>NexusAI</span>
+          <span>chat-keeper</span>
         </RouterLink>
 
         <div class="auth-left-content">
           <h2>欢迎回来</h2>
-          <p>登录后即可访问 50+ 顶级 AI 模型，开启高效智能创作之旅。</p>
+          <p>登录后即可访问国际顶级 AI 模型，开启高效智能创作之旅。</p>
 
-          <div class="testimonial">
-            <p class="testimonial-text">"NexusAI 让我一个账号搞定所有 AI 需求，效率提升了三倍不止。"</p>
-            <div class="testimonial-author">
-              <div class="author-avatar">张</div>
-              <div>
-                <div class="author-name">张晓明</div>
-                <div class="author-role">独立开发者</div>
-              </div>
-            </div>
+          <div class="trial-note">
+            <p class="trial-text">本站目前试运营中，旨在为每个客户提供优质的国外 AI 聊天服务，如有问题可进群反馈，群号：（暂定）</p>
           </div>
         </div>
 
@@ -108,7 +101,7 @@ const showPwd = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-const modelPills = ['GPT-5', 'Claude 4.7', 'Gemini 1.5', 'DeepSeek-V3.2', 'o1', 'Mistral']
+const modelPills = ['xAI', 'Anthropic', 'Gemini', 'OpenAI']
 
 async function handleLogin() {
   loading.value = true
@@ -158,6 +151,13 @@ async function handleLogin() {
       },
       data.permissions
     )
+
+    // 保存用户名和密码到 localStorage，用于兑换激活码
+    localStorage.setItem('userCredentials', JSON.stringify({
+      username: data.name,
+      email: form.value.email,
+      password: form.value.password
+    }))
 
     // 登录成功后跳转到个人中心页
     router.push('/profile')
@@ -215,23 +215,13 @@ async function handleLogin() {
 .auth-left-content { flex: 1; }
 .auth-left-content h2 { font-family: var(--font-display); font-size: 28px; font-weight: 800; margin-bottom: 12px; }
 .auth-left-content p { color: var(--text-secondary); font-size: 15px; line-height: 1.7; margin-bottom: 32px; }
-.testimonial {
+.trial-note {
   background: rgba(255,255,255,0.04);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 20px;
 }
-.testimonial-text { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; font-style: italic; }
-.testimonial-author { display: flex; align-items: center; gap: 10px; }
-.author-avatar {
-  width: 36px; height: 36px;
-  background: var(--gradient-accent);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 700;
-}
-.author-name { font-size: 14px; font-weight: 600; }
-.author-role { font-size: 12px; color: var(--text-muted); }
+.trial-text { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 0; }
 .model-pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .model-pill {
   padding: 5px 12px;

@@ -5,8 +5,7 @@ import Register from '../views/Register.vue'
 import UserProfile from '../views/UserProfile.vue'
 import Models from '../views/Models.vue'
 import Pricing from '../views/Pricing.vue'
-import AdminLogin from '../views/AdminLogin.vue'
-import AdminRedemptionCodes from '../views/AdminRedemptionCodes.vue'
+import BillingRules from '../views/BillingRules.vue'
 
 const routes = [
   {
@@ -41,21 +40,9 @@ const routes = [
     component: Pricing
   },
   {
-    path: '/admin/login',
-    name: 'AdminLogin',
-    component: AdminLogin
-  },
-  {
-    path: '/admin',
-    name: 'AdminRedemptionCodes',
-    component: AdminRedemptionCodes,
-    meta: { requiresAdmin: true }
-  },
-  {
-    path: '/admin/redemption-codes',
-    name: 'AdminRedemptionCodesAlias',
-    component: AdminRedemptionCodes,
-    meta: { requiresAdmin: true }
+    path: '/billing-rules',
+    name: 'BillingRules',
+    component: BillingRules
   }
 ]
 
@@ -64,19 +51,9 @@ const router = createRouter({
   routes
 })
 
-// 添加路由守卫检查管理员权限
+// 添加路由守卫检查用户权限
 router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresAdmin)) {
-    // 检查是否有管理员 token
-    const adminToken = localStorage.getItem('adminToken')
-    if (!adminToken) {
-      // 如果没有管理员 token，重定向到管理员登录页
-      next('/admin/login')
-    } else {
-      // 如果有 token，继续
-      next()
-    }
-  } else if (to.matched.some(record => record.meta.requiresAuth)) {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
     // 检查普通用户认证
     const token = localStorage.getItem('token')
     if (!token || token === undefined) {

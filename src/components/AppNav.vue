@@ -15,20 +15,15 @@
             </defs>
           </svg>
         </div>
-        <span class="logo-text">NexusAI</span>
+        <span class="logo-text">chat-keeper</span>
       </RouterLink>
 
       <!-- Desktop Nav -->
       <ul class="nav-links">
         <li><RouterLink to="/models" class="nav-link">模型广场</RouterLink></li>
         <li><RouterLink to="/pricing" class="nav-link">定价方案</RouterLink></li>
-        <li><a href="#features" class="nav-link">功能特性</a></li>
-        <li><a href="#faq" class="nav-link">常见问题</a></li>
-        
-        <!-- 管理员入口 -->
-        <template v-if="isAdmin">
-          <li><RouterLink to="/admin" class="nav-link admin-link">管理员后台</RouterLink></li>
-        </template>
+        <li><a href="/#features" class="nav-link">功能特性</a></li>
+        <li><RouterLink to="/billing-rules" class="nav-link">计费规则</RouterLink></li>
       </ul>
 
       <!-- Actions -->
@@ -84,13 +79,8 @@
     <div class="mobile-menu" :class="{ open: mobileOpen }">
       <RouterLink to="/models" class="mobile-link" @click="mobileOpen=false">模型广场</RouterLink>
       <RouterLink to="/pricing" class="mobile-link" @click="mobileOpen=false">定价方案</RouterLink>
-      <a href="#features" class="mobile-link" @click="mobileOpen=false">功能特性</a>
-      <a href="#faq" class="mobile-link" @click="mobileOpen=false">常见问题</a>
-      
-      <!-- 管理员入口 -->
-      <template v-if="isAdmin">
-        <RouterLink to="/admin" class="mobile-link admin-link" @click="mobileOpen=false">管理员后台</RouterLink>
-      </template>
+      <a href="/#features" class="mobile-link" @click="mobileOpen=false">功能特性</a>
+      <RouterLink to="/billing-rules" class="mobile-link" @click="mobileOpen=false">计费规则</RouterLink>
       
       <template v-if="userStore.state.isLoggedIn">
         <RouterLink to="/profile" class="mobile-link" @click="mobileOpen=false">个人中心</RouterLink>

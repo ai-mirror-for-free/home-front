@@ -97,12 +97,61 @@ export const deleteRedemptionCodes = async (ids) => {
  * 用户兑换兑换码
  */
 export const redeemCode = async (data) => {
-  const response = await fetch(`${API_BASE}/redeem-code`, {
+  const response = await fetch(`${API_BASE}/random-activation-code`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+
+  return await response.json()
+}
+
+/**
+ * 批量生成激活码
+ * @param {Object} data - 请求数据
+ * @param {string} data.username - 管理员用户名
+ * @param {string} data.password - 管理员密码
+ * @param {Array} data.tasks - 任务列表，格式: [[plan_level, days, count], ...]
+ */
+export const generateActivationCodes = async (data) => {
+  const token = localStorage.getItem('adminToken')
+  const response = await fetch(`${API_BASE}/admin/generate-activation-codes`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+
+  return await response.json()
+}
+
+/**
+ * 获取激活码统计信息
+ * @param {Object} credentials - 管理员认证信息
+ * @param {string} credentials.username - 管理员用户名
+ * @param {string} credentials.password - 管理员密码
+ */
+export const getActivationCodesStats = async (credentials) => {
+  const token = localStorage.getItem('adminToken')
+  const response = await fetch(`${API_BASE}/admin/activation-codes/stats`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(credentials),
   })
 
   if (!response.ok) {

@@ -15,11 +15,11 @@
               </linearGradient>
             </defs>
           </svg>
-          <span>NexusAI</span>
+          <span>chat-keeper</span>
         </RouterLink>
 
         <div class="auth-left-content">
-          <h2>加入 NexusAI</h2>
+          <h2>加入 chat-keeper</h2>
           <p>免费注册，立享体验额度。无需信用卡，30秒快速开始。</p>
 
           <div class="perks">
@@ -162,16 +162,15 @@ const verificationSent = ref(false) // 是否已发送过验证码
 
 
 const perks = [
-  { icon: '🎁', text: '新用户注册即送 50 万 Token 体验额度' },
-  { icon: '⚡', text: '立即访问 GPT-4o、Claude、Gemini' },
+  { icon: '🎁', text: '新用户注册即送 5w 体验额度' },
+  { icon: '⚡', text: '立即访问 GPT、Claude、Gemini、xAI(Grok)' },
   { icon: '🔒', text: '数据加密保护，隐私安全保障' },
   { icon: '🌍', text: '国内直连，无需 VPN，随时可用' },
-  { icon: '💳', text: '免费计划永久有效，无需信用卡' },
+  { icon: '💳', text: '免费计划包含一天体验时间，无需信用卡' },
 ]
 
 const stats = [
-  { num: '10万+', label: '注册用户' },
-  { num: '50+', label: 'AI 模型' },
+  { num: '10+', label: 'AI 模型' },
   { num: '99.9%', label: '可用率' },
 ]
 
