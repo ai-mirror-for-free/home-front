@@ -12,7 +12,7 @@
 
       <!-- Rules List -->
       <div class="rules-grid">
-        <div v-for="(rule, index) in billingRules" :key="index" class="rule-card card">
+        <div v-for="(rule, index) in billingRules" :key="index" :id="rule.id" class="rule-card card">
           <div class="rule-icon">{{ rule.icon }}</div>
           <h3 class="rule-title">{{ rule.title }}</h3>
           <p class="rule-desc">{{ rule.description }}</p>
@@ -30,16 +30,19 @@
 <script setup>
 const billingRules = [
   {
+    id: 'rule-1',
     icon: '⏰',
     title: '额度过期规则',
     description: '请在额度时间内将额度用完，过期后将不可使用。'
   },
   {
+    id: 'rule-2',
     icon: '💾',
     title: '未使用完的额度',
     description: '未使用完的额度本身不会消失，但是重新使用需要购买新套餐，过期时间以新购买套餐为准。'
   },
   {
+    id: 'rule-3',
     icon: '🔄',
     title: '额度继承',
     description: '额度会自动继承到新购买的套餐上。'
@@ -80,6 +83,7 @@ const billingRules = [
   display: flex;
   flex-direction: column;
   gap: 16px;
+  scroll-margin-top: 100px;
 }
 
 .rule-icon {

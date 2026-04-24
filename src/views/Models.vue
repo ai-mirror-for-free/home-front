@@ -48,7 +48,7 @@
         <div class="cta-content">
           <h2>解锁全部模型</h2>
           <p>前往淘宝购买订阅套餐，获取更多模型访问权限</p>
-          <a href="https://h5.m.taobao.com/awp/core/detail.htm?ft=t&id=1044843692829" target="_blank" class="btn btn-primary">前往淘宝订阅</a>
+          <a href="https://e.tb.cn/h.is8ENECRT7auWfa?tk=1stT58rRcnx" target="_blank" class="btn btn-primary">前往淘宝订阅</a>
         </div>
       </div>
     </div>
@@ -198,8 +198,20 @@ const allModels = [
     tagClass: 'tag-cyan', 
     desc: 'Anthropic 最强旗舰，深度推理能力超强，复杂任务处理首选。', 
     caps: ['深度推理', '数学', '科学', '代码'], 
+    series: 'anthropic' 
+  },
+  { 
+    id: 'claude-opus-4.7', 
+    provider: 'Anthropic', 
+    name: 'claude-opus-4.7', 
+    emoji: '🧮', 
+    gradient: 'linear-gradient(135deg,#1d4ed8,#1e3a8a)', 
+    tag: '旗舰', 
+    tagClass: 'tag-cyan', 
+    desc: 'Anthropic 最新旗舰模型，推理能力再升级，复杂问题解决更加精准。', 
+    caps: ['深度推理', '数学', '科学', '代码', '最新'], 
     series: 'anthropic',
-    isHot: true 
+    isNew: true 
   },
   { 
     id: 'claude-sonnet-4.6', 

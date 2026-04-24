@@ -68,7 +68,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const taobaoUrl = 'https://h5.m.taobao.com/awp/core/detail.htm?ft=t&id=1044843692829'
+const taobaoUrl = 'https://e.tb.cn/h.is8ENECRT7auWfa?tk=1stT58rRcnx'
 
 const plans = ref([
   {

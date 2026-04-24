@@ -51,7 +51,7 @@
               <button @click="goToOpenWebUI" class="btn btn-primary">
                 开始聊天
               </button>
-              <a href="https://h5.m.taobao.com/awp/core/detail.htm?ft=t&id=1044843692829" class="btn btn-outline">
+              <a href="https://e.tb.cn/h.is8ENECRT7auWfa?tk=1stT58rRcnx" class="btn btn-outline">
                 购买套餐
               </a>
             </div>

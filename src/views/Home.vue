@@ -10,9 +10,13 @@
       <div class="hero-grid"></div>
 
       <div class="container hero-content">
-        <div class="hero-badge">
+        <div class="hero-badge" v-if="announcements.length > 0">
           <span class="badge-dot"></span>
-          <span>全新发布 — xAI、Anthropic、Gemini、OpenAI 国际顶级模型现已上线</span>
+          <span class="announcement-text">{{ currentAnnouncement.content }}</span>
+        </div>
+        <div v-else class="hero-badge">
+          <span class="badge-dot"></span>
+          <span>全新发布 — xAI、Anthropic、Claude、Gemini、OpenAI 国际顶级模型现已上线</span>
         </div>
 
         <h1 class="hero-title">
@@ -35,7 +39,7 @@
 
         <div class="hero-stats">
           <div class="stat">
-            <span class="stat-num">10+</span>
+            <span class="stat-num">{{ modelCount }}+</span>
             <span class="stat-label">AI 模型</span>
           </div>
           <div class="stat-divider"></div>
@@ -105,7 +109,7 @@
         </div>
 
         <div style="text-align:center;margin-top:48px">
-          <RouterLink to="/models" class="btn btn-outline btn-lg">查看全部 10+ 模型</RouterLink>
+          <RouterLink to="/models" class="btn btn-outline btn-lg">查看全部 {{ modelCount }} 模型</RouterLink>
         </div>
       </div>
     </section>
@@ -192,15 +196,78 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const orbitModels = [
   { name: 'GPT', icon: '🤖' },
   { name: 'Claude', icon: '🧠' },
   { name: 'Gemini', icon: '💫' },
   { name: 'xAI', icon: '🔥' },
-  { name: 'Llama', icon: '🦙' },
 ]
+
+const modelCount = ref('50+')
+const totalModels = ref(0)
+
+// 公告相关
+const announcements = ref([])
+const currentAnnouncementIndex = ref(0)
+const currentAnnouncement = ref({ content: '' })
+let announcementTimer = null
+
+const typeStyles = {
+  info: { color: 'var(--accent-cyan)', bg: 'rgba(56,189,248,0.08)', border: 'rgba(56,189,248,0.2)' },
+  warning: { color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)' },
+  error: { color: '#ef4444', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.2)' },
+  success: { color: '#22c55e', bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.2)' },
+}
+
+// 格式化时间戳
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp * 1000)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// 获取公告列表
+async function fetchAnnouncements() {
+  try {
+    const response = await fetch('/api/v1/configs/banners')
+    if (response.ok) {
+      const data = await response.json()
+      if (Array.isArray(data) && data.length > 0) {
+        // 按时间排序，最新的在前
+        announcements.value = data.sort((a, b) => b.timestamp - a.timestamp).map(item => ({
+          id: item.id,
+          type: item.type || 'info',
+          content: `${formatTimestamp(item.timestamp)} ${item.content}`,
+        }))
+        if (announcements.value.length > 0) {
+          currentAnnouncement.value = announcements.value[0]
+        }
+      }
+    }
+  } catch (error) {
+    console.log('获取公告失败，使用默认内容')
+  }
+}
+
+// 自动滚动公告
+function startAnnouncementScroll() {
+  if (announcements.value.length <= 1) return
+  announcementTimer = setInterval(() => {
+    currentAnnouncementIndex.value = (currentAnnouncementIndex.value + 1) % announcements.value.length
+    currentAnnouncement.value = announcements.value[currentAnnouncementIndex.value]
+  }, 5000) // 每5秒切换
+}
+
+function stopAnnouncementScroll() {
+  if (announcementTimer) {
+    clearInterval(announcementTimer)
+    announcementTimer = null
+  }
+}
 
 function orbitStyle(index, total) {
   const angle = (index / total) * 360
@@ -214,6 +281,33 @@ function orbitStyle(index, total) {
   }
 }
 
+// 获取模型数量
+async function fetchModelCount() {
+  try {
+    const response = await fetch('/api/available-models')
+    if (response.ok) {
+      const data = await response.json()
+      if (data && data.svip && data.svip.modele_list) {
+        totalModels.value = data.svip.modele_list.length
+        modelCount.value = totalModels.value + '+'
+      }
+    }
+  } catch (error) {
+    console.log('获取模型数量失败，使用默认值')
+  }
+}
+
+onMounted(() => {
+  fetchModelCount()
+  fetchAnnouncements().then(() => {
+    startAnnouncementScroll()
+  })
+})
+
+onUnmounted(() => {
+  stopAnnouncementScroll()
+})
+
 const featuredModels = [
   {
     id: 1, provider: 'OpenAI', name: 'GPT-5.4',
@@ -224,7 +318,7 @@ const featuredModels = [
     ctx: '128K 上下文'
   },
   {
-    id: 2, provider: 'Anthropic', name: 'Claude Opus 4.6',
+    id: 2, provider: 'Anthropic', name: 'Claude Opus 4.7',
     emoji: '🧠', gradient: 'linear-gradient(135deg,#d97706,#92400e)',
     tag: '推理强', tagClass: 'tag-purple',
     desc: '专注于安全与深度推理，超长上下文处理能力卓越，适合文档分析与复杂逻辑任务。',
@@ -248,19 +342,19 @@ const featuredModels = [
     ctx: '128K 上下文'
   },
   {
-    id: 5, provider: 'Meta', name: 'Llama 3.1 405B',
-    emoji: '🦙', gradient: 'linear-gradient(135deg,#0284c7,#075985)',
-    tag: '开源', tagClass: 'tag-cyan',
-    desc: 'Meta 最大规模开源模型，4050亿参数，综合能力强大，支持多语言与代码生成。',
-    caps: ['开源免费', '多语言', '代码', '对话'],
-    ctx: '128K 上下文'
-  },
-  {
     id: 6, provider: 'Anthropic', name: 'Claude Sonnet 4.6',
     emoji: '📝', gradient: 'linear-gradient(135deg,#b45309,#78350f)',
     tag: '均衡', tagClass: 'tag-green',
     desc: 'Anthropic 均衡旗舰，深度推理卓越，长文档处理能力出众。',
     caps: ['推理', '文档', '创作', '代码'],
+    ctx: '200K 上下文'
+  },
+  {
+    id: 7, provider: 'Anthropic', name: 'Claude Opus 4.6',
+    emoji: '🧠', gradient: 'linear-gradient(135deg,#d97706,#92400e)',
+    tag: '旗舰', tagClass: 'tag-purple',
+    desc: 'Anthropic 旗舰模型，深度推理能力卓越，超长上下文处理能力出众。',
+    caps: ['深度推理', '文档分析', '创作', '代码'],
     ctx: '200K 上下文'
   },
 ]
@@ -341,6 +435,15 @@ const features = [
   color: var(--accent-cyan);
   margin-bottom: 28px;
   animation: fadeUp 0.6s ease forwards;
+  cursor: default;
+  flex-wrap: wrap;
+}
+.announcement-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  max-width: 800px;
+  word-break: break-word;
 }
 .badge-dot {
   width: 7px; height: 7px;
