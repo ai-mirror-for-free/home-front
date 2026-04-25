@@ -68,13 +68,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const taobaoUrl = 'https://e.tb.cn/h.is8ENECRT7auWfa?tk=1stT58rRcnx'
+const defaultTaobaoUrl = 'https://e.tb.cn/h.is8ENECRT7auWfa?tk=1stT58rRcnx'
 
 const plans = ref([
   {
     id: 'free', name: '基础版', subtitle: '适合轻度使用', icon: '🌱', iconBg: 'rgba(52,211,153,0.15)',
     price: '30',
-    taobaoUrl: taobaoUrl,
+    taobaoUrl: defaultTaobaoUrl,
     popular: false,
     features: [
       { text: '每日 20 次免费对话', included: true },
@@ -88,7 +88,7 @@ const plans = ref([
   {
     id: 'pro', name: '专业版', subtitle: '适合个人用户和创作者', icon: '⚡', iconBg: 'rgba(56,189,248,0.15)',
     price: '68',
-    taobaoUrl: taobaoUrl,
+    taobaoUrl: defaultTaobaoUrl,
     popular: true,
     features: [
       { text: '无限次对话', included: true },
@@ -101,7 +101,7 @@ const plans = ref([
   {
     id: 'team', name: '至尊版', subtitle: '适合重度用户', icon: '👥', iconBg: 'rgba(167,139,250,0.15)',
     price: '198',
-    taobaoUrl: taobaoUrl,
+    taobaoUrl: defaultTaobaoUrl,
     popular: false,
     features: [
       { text: '全部模型访问权限', included: true },
@@ -121,6 +121,23 @@ function formatModelName(model) {
     return model.split('/')[1]
   }
   return model
+}
+
+// 获取淘宝链接
+async function fetchTaobaoUrl() {
+  try {
+    const response = await fetch('/api/text/tbUrl')
+    if (response.ok) {
+      const data = await response.json()
+      if (data && data.url) {
+        plans.value.forEach(plan => {
+          plan.taobaoUrl = data.url
+        })
+      }
+    }
+  } catch (error) {
+    console.log('获取淘宝链接失败，使用默认链接')
+  }
 }
 
 // 获取可用模型列表
@@ -157,6 +174,7 @@ function updatePlanModels(data) {
 }
 
 onMounted(() => {
+  fetchTaobaoUrl()
   fetchAvailableModels()
 })
 </script>
