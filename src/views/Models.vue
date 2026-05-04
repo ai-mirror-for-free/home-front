@@ -186,6 +186,19 @@ const allModels = [
     series: 'openai',
     isNew: true 
   },
+  { 
+    id: 'gpt-5.5', 
+    provider: 'OpenAI', 
+    name: 'gpt-5.5', 
+    emoji: '🚀', 
+    gradient: 'linear-gradient(135deg,#10a37f,#065f46)', 
+    tag: '旗舰', 
+    tagClass: 'tag-green', 
+    desc: 'OpenAI 最新一代旗舰模型，能力全面升级，推理能力大幅提升，支持更强多模态。', 
+    caps: ['文本', '图像', '语音', '代码', '深度推理'], 
+    series: 'openai',
+    isHot: true 
+  },
 
   // Anthropic 系列
   { 
@@ -239,9 +252,22 @@ const allModels = [
   },
 ]
 
+// 从模型名称中提取版本号用于排序
+const extractVersion = (name) => {
+  // 匹配版本号格式，如 3.1, 4.20, 5.4 等
+  const match = name.match(/-(\d+(?:\.\d+)?)/)
+  if (match) {
+    const parts = match[1].split('.').map(Number)
+    // 返回一个可比较的数字，高版本优先
+    return parts[0] * 1000 + (parts[1] || 0)
+  }
+  return 0
+}
+
 const filteredModels = computed(() => {
-  if (activeSeries.value === 'all') return allModels
-  return allModels.filter(m => m.series === activeSeries.value)
+  let models = activeSeries.value === 'all' ? allModels : allModels.filter(m => m.series === activeSeries.value)
+  // 按版本号降序排列，版本号越新越靠前
+  return [...models].sort((a, b) => extractVersion(b.name) - extractVersion(a.name))
 })
 
 // 获取模型图标

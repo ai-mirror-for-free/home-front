@@ -9,6 +9,10 @@ export async function sendVerificationCode(email) {
     const response = await axios.post(`${API_BASE_URL}/send-verification-code`, {
       email
     })
+    // 检查返回的 message 是否包含错误信息（如邮箱已被注册）
+    if (response.data && response.data.message && response.data.message.includes('邮箱地址已被占用')) {
+      throw new Error('该邮箱地址已注册，请直接登录或找回密码')
+    }
     return response.data
   } catch (error) {
     if (error.response) {

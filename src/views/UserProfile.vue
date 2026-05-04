@@ -35,15 +35,15 @@
                 <div 
                   :class="[
                     'countdown-value', 
-                    daysUntilExpiration <= 7 ? 'countdown-warning' : ''
+                    daysUntilExpiration <= 7 && daysUntilExpiration > 0 ? 'countdown-warning' : ''
                   ]"
                 >
-                  {{ daysUntilExpiration }} 天
+                  {{ daysUntilExpiration < 0 ? 'infinity' : daysUntilExpiration }} 天
                 </div>
               </div>
             </div>
             
-            <div class="subscription-status" v-if="daysUntilExpiration <= 0">
+            <div class="subscription-status" v-if="daysUntilExpiration <= 0 && !isAdmin">
               <span class="status-message">您的套餐已过期，请及时续费</span>
             </div>
             
@@ -102,7 +102,7 @@
             <div class="quota-stats">
               <div class="quota-item">
                 <span class="quota-label">剩余额度</span>
-                <span class="quota-value quota-remain">{{ quotaInfo.remain_quota.toLocaleString() }}</span>
+                <span class="quota-value quota-remain">{{ quotaInfo.remain_quota < 0 ? 'infinity' : quotaInfo.remain_quota.toLocaleString() }}</span>
                 <span class="quota-unit">tokens</span>
               </div>
               <div class="quota-item">
@@ -172,6 +172,11 @@ const redemptionMessageType = ref('') // 'success' or 'error'
 const userInfo = computed(() => userStore.state.userInfo)
 const subscriptionInfo = computed(() => userStore.state.subscriptionInfo)
 const quotaInfo = computed(() => userStore.state.quotaInfo)
+
+// 判断是否为管理员角色
+const isAdmin = computed(() => {
+  return userInfo.value.role === 'admin'
+})
 
 // 计算距离套餐过期的天数
 const daysUntilExpiration = computed(() => {

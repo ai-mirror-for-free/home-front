@@ -1,5 +1,7 @@
 <template>
   <div id="app">
+    <!-- 公告卡片 -->
+    <NoticeCard />
     <!-- 非管理员页面显示顶部导航栏 -->
     <template v-if="!isAdminRoute">
       <AppNav />
@@ -17,6 +19,7 @@ import { useRoute } from 'vue-router'
 import AppNav from './components/AppNav.vue'
 import AppFooter from './components/AppFooter.vue'
 import FloatingIcons from './components/FloatingIcons.vue'
+import NoticeCard from './components/NoticeCard.vue'
 
 const route = useRoute()
 
