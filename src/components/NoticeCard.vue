@@ -154,7 +154,10 @@ onMounted(async () => {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   width: 100%;
-  max-width: 480px;
+  max-width: 960px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 0 40px rgba(56, 189, 248, 0.1), 0 20px 60px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
@@ -211,7 +214,7 @@ onMounted(async () => {
   font-size: 15px;
   line-height: 1.7;
   color: var(--text-primary);
-  max-height: 300px;
+  flex: 1;
   overflow-y: auto;
 }
 

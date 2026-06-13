@@ -77,37 +77,36 @@ const plans = ref([
     taobaoUrl: defaultTaobaoUrl,
     popular: false,
     features: [
-      { text: '每日 20 次免费对话', included: true },
+      { text: '免费5w额度', included: true },
       { text: '基础模型访问权限', included: true },
-      { text: '社区技术支持', included: true },
-      { text: '高级模型访问权限', included: false },
+      { text: '社区技术支持', included: false },
       { text: '优先响应速度', included: false },
     ],
     models: []
   },
   {
-    id: 'pro', name: '专业版', subtitle: '适合个人用户和创作者', icon: '⚡', iconBg: 'rgba(56,189,248,0.15)',
+    id: 'pro', name: 'VIP', subtitle: '适合个人用户和创作者', icon: '⚡', iconBg: 'rgba(56,189,248,0.15)',
     price: '68',
     taobaoUrl: defaultTaobaoUrl,
     popular: true,
     features: [
-      { text: '无限次对话', included: true },
-      { text: '更多模型访问权限', included: true },
-      { text: '优先响应速度', included: true },
+      { text: '按量付费对话', included: true },
+      { text: '高级模型访问权限', included: true },
       { text: '技术支持', included: true },
+      { text: '优先响应速度', included: true },
     ],
     models: []
   },
   {
-    id: 'team', name: '至尊版', subtitle: '适合重度用户', icon: '👥', iconBg: 'rgba(167,139,250,0.15)',
+    id: 'team', name: 'SVIP', subtitle: '适合重度用户', icon: '👑', iconBg: 'rgba(167,139,250,0.15)',
     price: '198',
     taobaoUrl: defaultTaobaoUrl,
     popular: false,
     features: [
-      { text: '全部模型访问权限', included: true },
-      { text: '最大额度支持', included: true },
-      { text: '极速响应速度', included: true },
+      { text: '按量付费对话', included: true },
+      { text: '最强模型访问权限', included: true },
       { text: '专属技术支持', included: true },
+      { text: '极速响应速度', included: true },
     ],
     models: []
   },
@@ -242,6 +241,7 @@ onMounted(() => {
 .price-currency { font-size: 22px; font-weight: 700; color: var(--text-secondary); align-self: flex-start; margin-top: 8px; }
 .price-amount { font-family: var(--font-display); font-size: 52px; font-weight: 800; line-height: 1; }
 .price-period { font-size: 14px; color: var(--text-muted); }
+.price-free { font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--accent-green); }
 
 .plan-btn { width: 100%; justify-content: center; margin-top: 24px; margin-bottom: 24px; text-decoration: none; }
 .plan-divider { height: 1px; background: var(--border); margin-bottom: 24px; }

@@ -25,8 +25,8 @@
         </h1>
 
         <p class="hero-desc">
-          一个账号，畅享 GPT、Claude、Gemini、Grok 等数十款顶尖大模型。
-          无需翻墙，按需付费，即刻开始你的 AI 之旅。
+          专注提供 <strong>Claude镜像</strong>、<strong>Gemini镜像</strong>、<strong>OpenAI镜像</strong>、<strong>OpenAI API</strong> 等顶级大模型访问服务。
+          一个账号，畅享 GPT、Claude、Gemini、Grok 等数十款顶尖大模型。<strong>国内直连</strong>，无需翻墙，按需付费，即刻开始你的 AI 之旅。
         </p>
 
         <div class="hero-actions">
@@ -81,8 +81,8 @@
       <div class="container">
         <div class="section-header">
           <span class="tag tag-cyan">模型广场</span>
-          <h2 class="section-title">接入业界最强 AI 模型</h2>
-          <p class="section-desc">从文字创作到代码生成，从图像理解到多模态交互，所有顶级模型一键可达。</p>
+          <h2 class="section-title">接入业界最强 AI 模型镜像</h2>
+          <p class="section-desc">提供 Claude镜像、Gemini镜像、OpenAI镜像、OpenAI API 等服务，从文字创作到代码生成，从图像理解到多模态交互，所有顶级模型一键可达。</p>
         </div>
 
         <div class="models-grid">

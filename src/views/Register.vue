@@ -66,7 +66,22 @@
             <!-- </div> -->
             <div class="form-group">
               <label>邮箱地址</label>
-              <input v-model="form.email" type="email" class="input-field" placeholder="your@email.com" required />
+              <div class="email-input-wrap">
+                <input v-model="emailUsername" type="text" class="input-field" placeholder="yourname" required />
+                <span class="email-at">@</span>
+                <select v-model="emailDomain" class="email-domain-select" required>
+                  <option value="qq.com">qq.com</option>
+                  <option value="foxmail.com">foxmail.com</option>
+                  <option value="gmail.com">gmail.com</option>
+                  <option value="163.com">163.com</option>
+                  <option value="126.com">126.com</option>
+                  <option value="outlook.com">outlook.com</option>
+                  <option value="hotmail.com">hotmail.com</option>
+                  <option value="icloud.com">icloud.com</option>
+                  <option value="yahoo.com">yahoo.com</option>
+                  <option value="edu.cn">edu.cn</option>
+                </select>
+              </div>
             </div>
             <div class="form-group">
               <label>设置密码</label>
@@ -144,11 +159,12 @@ const router = useRouter()
 const form = ref({ 
   name: '', 
   phone: '', 
-  email: '', 
   password: '', 
   verification_code: '',
   invite: '' 
 })
+const emailUsername = ref('')
+const emailDomain = ref('qq.com')
 const showPwd = ref(false)
 const agreed = ref(false)
 const loading = ref(false)
@@ -192,7 +208,7 @@ const strengthLabel = computed(() => ['', '弱', '一般', '强', '非常强'][p
 async function handleSendCode() {
   if (!canSendCode.value) return
   
-  const email = form.value.email.trim()
+  const email = emailUsername.value.trim() + '@' + emailDomain.value
   
   // 验证邮箱格式
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -232,13 +248,15 @@ async function handleRegister() {
   loading.value = true
   error.value = ''
   
+  const email = emailUsername.value.trim() + '@' + emailDomain.value
+  
   // 验证必填字段
   if (!form.value.name.trim()) {
     error.value = '请输入姓名'
     loading.value = false
     return
   }
-  if (!form.value.email.trim()) {
+  if (!emailUsername.value.trim()) {
     error.value = '请输入邮箱地址'
     loading.value = false
     return
@@ -264,7 +282,7 @@ async function handleRegister() {
     const result = await apiRegister({
       username: form.value.name.trim().toLowerCase().replace(/\s+/g, '_'),
       password: form.value.password,
-      email: form.value.email.trim(),
+      email: email,
       verification_code: form.value.verification_code,
       aff_code: form.value.invite?.trim() || undefined
     })
@@ -287,7 +305,9 @@ async function handleRegister() {
 
 // 重置表单
 function resetForm() {
-  form.value = { name: '', phone: '', email: '', password: '', verification_code: '', invite: '' }
+  form.value = { name: '', phone: '', password: '', verification_code: '', invite: '' }
+  emailUsername.value = ''
+  emailDomain.value = 'qq.com'
   showPwd.value = false
   agreed.value = false
   error.value = ''
@@ -396,6 +416,36 @@ function resetForm() {
   display: flex; align-items: center; gap: 8px;
   padding: 12px 16px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
   border-radius: var(--radius-sm); font-size: 13px; color: #f87171;
+}
+.email-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.email-at {
+  padding: 0 8px;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+.email-domain-select {
+  height: 42px;
+  padding: 0 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-body);
+}
+.email-domain-select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+.email-domain-select:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
 }
 .code-input-wrap {
   display: flex; gap: 8px;

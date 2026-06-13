@@ -6,8 +6,8 @@
       <!-- Header -->
       <div class="page-header">
         <span class="tag tag-purple">四大系列</span>
-        <h1 class="page-title">AI 模型广场</h1>
-        <p class="page-desc">汇聚全球顶级 AI 模型，支持 Gemini、x-ai、OpenAI、Anthropic 四大系列，满足你的所有使用场景。</p>
+        <h1 class="page-title">AI 模型广场 - Gemini镜像 Claude镜像 OpenAI镜像</h1>
+        <p class="page-desc">汇聚全球顶级 AI 模型，提供 Gemini镜像、Claude镜像、OpenAI镜像、OpenAI API 等服务，支持 Google、xAI、OpenAI、Anthropic 四大系列。</p>
       </div>
 
       <!-- Series Filters -->
@@ -22,7 +22,15 @@
       </div>
 
       <!-- Models Grid -->
-      <div class="models-grid">
+      <div v-if="loading" class="models-grid loading-grid">
+        <div v-for="i in 6" :key="i" class="model-card card loading-card">
+          <div class="loading-placeholder"></div>
+        </div>
+      </div>
+      <div v-else-if="filteredModels.length === 0" class="empty-state">
+        <p>暂无可用模型</p>
+      </div>
+      <div v-else class="models-grid">
         <div v-for="m in filteredModels" :key="m.id" class="model-card card">
           <div class="mc-header">
             <div class="mc-avatar" :style="{ background: m.gradient }">
@@ -37,8 +45,8 @@
 
           <p class="mc-desc">{{ m.desc }}</p>
 
-          <div class="mc-caps">
-            <span v-for="c in m.caps" :key="c" class="cap-chip">{{ c }}</span>
+          <div v-if="m.caps.length" class="mc-caps">
+            <span v-for="c in m.caps.slice(0, 4)" :key="c" class="cap-chip">{{ c }}</span>
           </div>
         </div>
       </div>
@@ -56,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const modelSeries = [
   { id: 'all', label: '全部', icon: '🌐' },
@@ -67,208 +75,68 @@ const modelSeries = [
 ]
 
 const activeSeries = ref('all')
-
-const allModels = [
-  // Gemini 系列
-  { 
-    id: 'gemini-3.1-pro', 
-    provider: 'Google', 
-    name: 'gemini-3.1-pro', 
-    emoji: '💫', 
-    gradient: 'linear-gradient(135deg,#4285f4,#1a56db)', 
-    tag: '旗舰', 
-    tagClass: 'tag-cyan', 
-    desc: '谷歌最新旗舰模型，100万token超长上下文，多模态能力出众。', 
-    caps: ['超长上下文', '多模态', '多语言'], 
-    series: 'gemini' 
-  },
-  { 
-    id: 'gemini-3.1-flash-lite', 
-    provider: 'Google', 
-    name: 'gemini-3.1-flash-lite', 
-    emoji: '⚡', 
-    gradient: 'linear-gradient(135deg,#1967d2,#0d47a1)', 
-    tag: '轻量', 
-    tagClass: 'tag-green', 
-    desc: 'Gemini 系列轻量版本，速度极快，成本极低，适合高频调用。', 
-    caps: ['快速', '轻量', '高性价比'], 
-    series: 'gemini' 
-  },
-  { 
-    id: 'gemini-3-flash', 
-    provider: 'Google', 
-    name: 'gemini-3-flash', 
-    emoji: '🚀', 
-    gradient: 'linear-gradient(135deg,#2563eb,#1e40af)', 
-    tag: '最新', 
-    tagClass: 'tag-cyan', 
-    desc: '谷歌最新一代模型，速度更快，能力更强，性价比极佳。', 
-    caps: ['快速', '多模态', '代码'], 
-    series: 'gemini', 
-    isNew: true 
-  },
-
-  // x-ai 系列
-  { 
-    id: 'grok-4.20', 
-    provider: 'x-ai', 
-    name: 'grok-4.20', 
-    emoji: '🔥', 
-    gradient: 'linear-gradient(135deg,#f97316,#dc2626)', 
-    tag: '旗舰', 
-    tagClass: 'tag-orange', 
-    desc: 'x-ai 最新旗舰模型，深度推理能力卓越，实时信息获取能力强。', 
-    caps: ['深度推理', '实时信息', '代码'], 
-    series: 'x-ai',
-    isHot: true 
-  },
-  { 
-    id: 'grok-4.1-fast', 
-    provider: 'x-ai', 
-    name: 'grok-4.1-fast', 
-    emoji: '⚡', 
-    gradient: 'linear-gradient(135deg,#ea580c,#9a3412)', 
-    tag: '快速', 
-    tagClass: 'tag-orange', 
-    desc: 'x-ai 快速响应模型，延迟低，适合实时对话和交互场景。', 
-    caps: ['快速响应', '低延迟', '对话'], 
-    series: 'x-ai' 
-  },
-  { 
-    id: 'grok-4-fast', 
-    provider: 'x-ai', 
-    name: 'grok-4-fast', 
-    emoji: '💨', 
-    gradient: 'linear-gradient(135deg,#f59e0b,#d97706)', 
-    tag: '极速', 
-    tagClass: 'tag-yellow', 
-    desc: 'x-ai 极速版本，极高吞吐量，适合批量处理和大规模调用。', 
-    caps: ['极速', '高吞吐', '批处理'], 
-    series: 'x-ai' 
-  },
-
-  // OpenAI 系列
-  { 
-    id: 'gpt-5.4', 
-    provider: 'OpenAI', 
-    name: 'gpt-5.4', 
-    emoji: '🤖', 
-    gradient: 'linear-gradient(135deg,#10a37f,#1a7f64)', 
-    tag: '旗舰', 
-    tagClass: 'tag-green', 
-    desc: 'OpenAI 最强旗舰，综合能力第一梯队，支持文字图像音频。', 
-    caps: ['文本', '图像', '语音', '代码'], 
-    series: 'openai',
-    isHot: true 
-  },
-  { 
-    id: 'gpt-5.4-mini', 
-    provider: 'OpenAI', 
-    name: 'gpt-5.4-mini', 
-    emoji: '⚡', 
-    gradient: 'linear-gradient(135deg,#059669,#047857)', 
-    tag: '轻量', 
-    tagClass: 'tag-green', 
-    desc: 'GPT-5.4 的精简版，速度快，价格低，适合高频调用场景。', 
-    caps: ['快速', '轻量', '高性价比'], 
-    series: 'openai' 
-  },
-  { 
-    id: 'gpt-5.4-nano', 
-    provider: 'OpenAI', 
-    name: 'gpt-5.4-nano', 
-    emoji: '📱', 
-    gradient: 'linear-gradient(135deg,#34d399,#10b981)', 
-    tag: '超轻', 
-    tagClass: 'tag-green', 
-    desc: 'OpenAI 超轻量模型，极低成本，极高速度，适合简单任务。', 
-    caps: ['超轻', '极速', '低成本'], 
-    series: 'openai',
-    isNew: true 
-  },
-  { 
-    id: 'gpt-5.5', 
-    provider: 'OpenAI', 
-    name: 'gpt-5.5', 
-    emoji: '🚀', 
-    gradient: 'linear-gradient(135deg,#10a37f,#065f46)', 
-    tag: '旗舰', 
-    tagClass: 'tag-green', 
-    desc: 'OpenAI 最新一代旗舰模型，能力全面升级，推理能力大幅提升，支持更强多模态。', 
-    caps: ['文本', '图像', '语音', '代码', '深度推理'], 
-    series: 'openai',
-    isHot: true 
-  },
-
-  // Anthropic 系列
-  { 
-    id: 'claude-opus-4.6', 
-    provider: 'Anthropic', 
-    name: 'claude-opus-4.6', 
-    emoji: '🧮', 
-    gradient: 'linear-gradient(135deg,#2563eb,#1e40af)', 
-    tag: '旗舰', 
-    tagClass: 'tag-cyan', 
-    desc: 'Anthropic 最强旗舰，深度推理能力超强，复杂任务处理首选。', 
-    caps: ['深度推理', '数学', '科学', '代码'], 
-    series: 'anthropic' 
-  },
-  { 
-    id: 'claude-opus-4.7', 
-    provider: 'Anthropic', 
-    name: 'claude-opus-4.7', 
-    emoji: '🧮', 
-    gradient: 'linear-gradient(135deg,#1d4ed8,#1e3a8a)', 
-    tag: '旗舰', 
-    tagClass: 'tag-cyan', 
-    desc: 'Anthropic 最新旗舰模型，推理能力再升级，复杂问题解决更加精准。', 
-    caps: ['深度推理', '数学', '科学', '代码', '最新'], 
-    series: 'anthropic',
-    isNew: true 
-  },
-  { 
-    id: 'claude-sonnet-4.6', 
-    provider: 'Anthropic', 
-    name: 'claude-sonnet-4.6', 
-    emoji: '🧠', 
-    gradient: 'linear-gradient(135deg,#d97706,#92400e)', 
-    tag: '均衡', 
-    tagClass: 'tag-purple', 
-    desc: 'Anthropic 均衡旗舰，深度推理卓越，长文档处理能力出众。', 
-    caps: ['推理', '文档', '创作', '代码'], 
-    series: 'anthropic' 
-  },
-  { 
-    id: 'claude-haiku-4.5', 
-    provider: 'Anthropic', 
-    name: 'claude-haiku-4.5', 
-    emoji: '📝', 
-    gradient: 'linear-gradient(135deg,#b45309,#78350f)', 
-    tag: '快速', 
-    tagClass: 'tag-green', 
-    desc: 'Anthropic 系列最快最轻量模型，低成本高效率，适合批量处理。', 
-    caps: ['快速', '轻量', '文本'], 
-    series: 'anthropic' 
-  },
-]
+const allModels = ref([])
+const loading = ref(true)
 
 // 从模型名称中提取版本号用于排序
 const extractVersion = (name) => {
-  // 匹配版本号格式，如 3.1, 4.20, 5.4 等
   const match = name.match(/-(\d+(?:\.\d+)?)/)
   if (match) {
     const parts = match[1].split('.').map(Number)
-    // 返回一个可比较的数字，高版本优先
     return parts[0] * 1000 + (parts[1] || 0)
   }
   return 0
 }
 
-const filteredModels = computed(() => {
-  let models = activeSeries.value === 'all' ? allModels : allModels.filter(m => m.series === activeSeries.value)
-  // 按版本号降序排列，版本号越新越靠前
-  return [...models].sort((a, b) => extractVersion(b.name) - extractVersion(a.name))
-})
+// 获取模型所属系列
+const getModelSeries = (modelName) => {
+  const lowerName = modelName.toLowerCase()
+  if (lowerName.includes('gemini')) return 'gemini'
+  if (lowerName.includes('grok') || lowerName.startsWith('x-ai')) return 'x-ai'
+  if (lowerName.includes('gpt') || lowerName.startsWith('openai')) return 'openai'
+  if (lowerName.includes('claude') || lowerName.startsWith('anthropic')) return 'anthropic'
+  return 'other'
+}
+
+// 获取模型标签
+const getModelTag = (modelName, modelData) => {
+  if (modelData?.tags) {
+    if (modelData.tags.toLowerCase().includes('reasoning') && modelData.model_ratio >= 2) return '旗舰'
+    if (modelData.tags.toLowerCase().includes('vision')) return '多模态'
+  }
+  const lowerName = modelName.toLowerCase()
+  if (lowerName.includes('nano') || lowerName.includes('lite')) return '轻量'
+  if (lowerName.includes('flash')) return '快速'
+  if (lowerName.includes('opus') || lowerName.match(/gpt-?\d+\.?\d*$/)) return '旗舰'
+  return '标准'
+}
+
+// 获取模型标签样式
+const getModelTagClass = (tag) => {
+  const classMap = {
+    '旗舰': 'tag-cyan',
+    '轻量': 'tag-green',
+    '快速': 'tag-orange',
+    '最新': 'tag-cyan',
+    '标准': 'tag-purple',
+    '多模态': 'tag-cyan'
+  }
+  return classMap[tag] || 'tag-purple'
+}
+
+// 生成描述文本
+const getModelDesc = (modelName, modelData) => {
+  if (modelData?.description) return modelData.description
+  const series = getModelSeries(modelName)
+  const seriesNames = { gemini: 'Google', 'x-ai': 'xAI', openai: 'OpenAI', anthropic: 'Anthropic' }
+  return `${seriesNames[series] || 'Unknown'} 提供的 AI 模型`
+}
+
+// 生成能力标签
+const getModelCaps = (modelData) => {
+  if (!modelData?.tags) return []
+  return modelData.tags.split(',').map(t => t.trim()).filter(Boolean)
+}
 
 // 获取模型图标
 const getModelIcon = (series) => {
@@ -280,6 +148,63 @@ const getModelIcon = (series) => {
   }
   return icons[series] || '/icon/grok.svg'
 }
+
+// 获取模型渐变
+const getModelGradient = (series) => {
+  const gradients = {
+    gemini: 'linear-gradient(135deg,#4285f4,#1a56db)',
+    'x-ai': 'linear-gradient(135deg,#f97316,#dc2626)',
+    openai: 'linear-gradient(135deg,#10a37f,#1a7f64)',
+    anthropic: 'linear-gradient(135deg,#2563eb,#1e40af)',
+    other: 'linear-gradient(135deg,#6b7280,#4b5563)'
+  }
+  return gradients[series] || gradients.other
+}
+
+// 获取模型
+async function fetchModels() {
+  try {
+    loading.value = true
+    const response = await fetch('/api/pricing')
+    if (response.ok) {
+      const data = await response.json()
+      if (data?.data) {
+        allModels.value = data.data.map(item => {
+          const name = item.model_name.includes('/') ? item.model_name.split('/')[1] : item.model_name
+          const series = getModelSeries(item.model_name)
+          // gemini系列明确设置供应商为Google
+          const provider = series === 'gemini' ? 'Google' : (item.model_name.includes('/') ? item.model_name.split('/')[0] : 'Unknown')
+          return {
+            id: item.model_name,
+            provider: provider,
+            name: name,
+            fullName: item.model_name,
+            emoji: '🤖',
+            gradient: getModelGradient(series),
+            tag: getModelTag(name, item),
+            tagClass: getModelTagClass(getModelTag(name, item)),
+            desc: getModelDesc(name, item),
+            caps: getModelCaps(item),
+            series: series
+          }
+        })
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch models:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const filteredModels = computed(() => {
+  let models = activeSeries.value === 'all' ? allModels.value : allModels.value.filter(m => m.series === activeSeries.value)
+  return [...models].sort((a, b) => extractVersion(b.name) - extractVersion(a.name))
+})
+
+onMounted(() => {
+  fetchModels()
+})
 </script>
 
 <style scoped>
@@ -394,6 +319,27 @@ const getModelIcon = (series) => {
   margin-bottom: 24px;
 }
 
-@media (max-width: 1024px) { .models-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .models-grid { grid-template-columns: 1fr; } }
+.loading-grid { grid-template-columns: repeat(3, 1fr); }
+.loading-card { min-height: 180px; }
+.loading-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+@media (max-width: 1024px) { .models-grid { grid-template-columns: repeat(2, 1fr); } .loading-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .models-grid { grid-template-columns: 1fr; } .loading-grid { grid-template-columns: 1fr; } }
 </style>

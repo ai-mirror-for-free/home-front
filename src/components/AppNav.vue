@@ -22,6 +22,7 @@
       <ul class="nav-links">
         <li><RouterLink to="/models" class="nav-link">模型广场</RouterLink></li>
         <li><RouterLink to="/pricing" class="nav-link">定价方案</RouterLink></li>
+        <li><RouterLink to="/experience" class="nav-link">体验中心</RouterLink></li>
         <li><a href="/#features" class="nav-link">功能特性</a></li>
         <li><RouterLink to="/billing-rules" class="nav-link">计费规则</RouterLink></li>
       </ul>
@@ -79,6 +80,7 @@
     <div class="mobile-menu" :class="{ open: mobileOpen }">
       <RouterLink to="/models" class="mobile-link" @click="mobileOpen=false">模型广场</RouterLink>
       <RouterLink to="/pricing" class="mobile-link" @click="mobileOpen=false">定价方案</RouterLink>
+      <RouterLink to="/experience" class="mobile-link" @click="mobileOpen=false">体验中心</RouterLink>
       <a href="/#features" class="mobile-link" @click="mobileOpen=false">功能特性</a>
       <RouterLink to="/billing-rules" class="mobile-link" @click="mobileOpen=false">计费规则</RouterLink>
       

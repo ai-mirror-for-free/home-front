@@ -24,7 +24,7 @@
           <p>登录后即可访问国际顶级 AI 模型，开启高效智能创作之旅。</p>
 
           <div class="trial-note">
-            <p class="trial-text">本站目前试运营中，旨在为每个客户提供优质的国外 AI 聊天服务，如有问题可进群反馈，群号：（暂定）</p>
+            <p class="trial-text">本站目前试运营中，旨在为每个客户提供优质的国外 AI 聊天服务，如有问题可进群反馈。</p>
           </div>
         </div>
 
@@ -62,7 +62,7 @@
             <div class="form-group">
               <label>
                 密码
-                <a href="#" class="forgot-link">忘记密码？</a>
+                <RouterLink to="/forgot-password" class="forgot-link">忘记密码？</RouterLink>
               </label>
               <div class="password-wrap">
                 <input v-model="form.password" :type="showPwd ? 'text' : 'password'" class="input-field" placeholder="••••••••" required />

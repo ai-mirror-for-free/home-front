@@ -2,10 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
+import ForgotPassword from '../views/ForgotPassword.vue'
 import UserProfile from '../views/UserProfile.vue'
 import Models from '../views/Models.vue'
 import Pricing from '../views/Pricing.vue'
 import BillingRules from '../views/BillingRules.vue'
+import Experience from '../views/Experience.vue'
 
 const routes = [
   {
@@ -22,6 +24,11 @@ const routes = [
     path: '/register',
     name: 'Register',
     component: Register
+  },
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: ForgotPassword
   },
   {
     path: '/profile',
@@ -43,6 +50,11 @@ const routes = [
     path: '/billing-rules',
     name: 'BillingRules',
     component: BillingRules
+  },
+  {
+    path: '/experience',
+    name: 'Experience',
+    component: Experience
   }
 ]
 

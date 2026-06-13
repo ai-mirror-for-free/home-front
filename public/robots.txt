@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chatkeeper.ai/sitemap.xml
+
+# Crawl-delay for polite bots
+Crawl-delay: 1
+
+# Disallow admin paths
+Disallow: /admin/
+Disallow: /api/

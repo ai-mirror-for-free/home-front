@@ -9,9 +9,13 @@ export async function sendVerificationCode(email) {
     const response = await axios.post(`${API_BASE_URL}/send-verification-code`, {
       email
     })
-    // 检查返回的 message 是否包含错误信息（如邮箱已被注册）
-    if (response.data && response.data.message && response.data.message.includes('邮箱地址已被占用')) {
-      throw new Error('该邮箱地址已注册，请直接登录或找回密码')
+    // 检查返回的 message 是否包含发送失败信息
+    if (response.data && response.data.message && response.data.message.includes('发送失败')) {
+      const message = response.data.message
+      // 提取最后一个冒号后的具体错误信息
+      const colonIndex = message.lastIndexOf(':')
+      const errorMsg = colonIndex !== -1 ? message.substring(colonIndex + 1).trim() : message
+      throw new Error(errorMsg)
     }
     return response.data
   } catch (error) {
