@@ -62,11 +62,14 @@ export async function sendExperience({ key, model, text, signal }) {
 
 export async function fetchExperienceModels() {
   try {
-    const response = await fetch(`${API_BASE}/experience/models`)
+    const response = await fetch(`${API_BASE}/pricing`)
     if (!response.ok) return []
     const data = await response.json()
     if (data && data.status === false) return []
-    return data?.data || data?.models || []
+    const list = data?.data || data?.models || []
+    return list
+      .map((m) => ({ id: m.model_name, name: m.model_name }))
+      .filter((m) => m.id)
   } catch (e) {
     return []
   }

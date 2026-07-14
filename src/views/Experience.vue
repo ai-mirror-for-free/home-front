@@ -78,7 +78,7 @@
               <label class="form-label sm">模型</label>
                 <select v-model="selectedModel" class="input-field model-select" :disabled="modelsLoading">
                 <option value="">请选择模型</option>
-                <option v-for="m in modelList" :key="m.id || m.model" :value="m.id || m.model || m.name">{{ m.id || m.model || m.name }}</option>
+                <option v-for="m in modelList" :key="m.id" :value="m.id">{{ m.name || m.id }}</option>
               </select>
             </div>
             <button class="btn btn-ghost btn-sm" @click="loadModels" :disabled="modelsLoading">刷新</button>
@@ -112,7 +112,7 @@
               class="input-field chat-input"
               rows="2"
               placeholder="输入消息，Enter 发送，Shift+Enter 换行"
-              :disabled="chatLoading || !key"
+              :disabled="chatLoading"
               @keydown.enter.exact.prevent="sendMessage"
             ></textarea>
             <button class="btn btn-primary send-btn" :disabled="chatLoading || !key || !selectedModel || !chatInput.trim()" @click="sendMessage">
@@ -171,8 +171,11 @@ const formatRemainTime = () => {
 
 function onKeyInput() {
   if (!key.value) return
+  const trimmed = key.value.trim()
+  if (trimmed !== key.value) key.value = trimmed
+  if (!trimmed) return
   const ttl = expireMinutes.value * 60 * 1000
-  setStoredKey(key.value, ttl)
+  setStoredKey(trimmed, ttl)
   keyExpiresAt.value = Date.now() + ttl
   balance.value = null
   scheduleExpire()
@@ -206,10 +209,13 @@ function clearKey() {
 
 async function fetchBalance() {
   if (!key.value) return
+  const trimmed = key.value.trim()
+  if (trimmed !== key.value) key.value = trimmed
+  if (!trimmed) return
   balanceLoading.value = true
   balanceError.value = ''
   try {
-    balance.value = await checkQuota(key.value)
+    balance.value = await checkQuota(trimmed)
   } catch (e) {
     balanceError.value = e.message || '查询失败'
     balance.value = null
@@ -225,7 +231,7 @@ async function loadModels() {
     modelList.value = list
     if (list.length && !selectedModel.value) {
       const first = list[0]
-      selectedModel.value = first.id || first.model || first.name || ''
+      selectedModel.value = first.id || ''
     }
   } catch (e) {
     modelList.value = []
@@ -327,7 +333,7 @@ onMounted(() => {
 <style scoped>
 .experience-page {
   padding-top: 100px;
-  padding-bottom: 60px;
+  padding-bottom: 100px;
   position: relative;
   overflow: hidden;
   min-height: 100vh;
@@ -349,7 +355,7 @@ onMounted(() => {
   gap: 24px;
 }
 
-.panel { padding: 24px; display: flex; flex-direction: column; gap: 18px; height: fit-content; }
+.panel { padding: 24px; display: flex; flex-direction: column; gap: 18px; height: fit-content; min-height: 0; }
 .panel-header { display: flex; justify-content: space-between; align-items: center; }
 .panel-title {
   font-family: var(--font-display);
@@ -412,7 +418,7 @@ onMounted(() => {
 .hint { display: flex; justify-content: flex-end; }
 .expire-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
 .expire-select {
-  background: rgba(255,255,255,0.04);
+  background-color: var(--bg-card, #1f2937);
   border: 1px solid var(--border);
   color: var(--text-primary);
   padding: 4px 8px;
@@ -420,6 +426,10 @@ onMounted(() => {
   font-size: 12px;
   cursor: pointer;
   outline: none;
+}
+.expire-select option {
+  background-color: var(--bg-card, #1f2937);
+  color: var(--text-primary);
 }
 
 .actions-row { display: flex; gap: 10px; }
@@ -469,18 +479,22 @@ onMounted(() => {
 }
 
 /* Chat */
-.panel:last-child { height: calc(100vh - 200px); }
+.panel:last-child { height: calc(100vh - 240px); min-height: 560px; }
 .chat-toolbar {
   display: flex;
   align-items: end;
   gap: 10px;
 }
 .model-select-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.model-select { font-size: 13px; padding: 10px 12px; }
+.model-select { font-size: 13px; padding: 10px 12px; background-color: var(--bg-card, #1f2937); }
+.model-select option {
+  background-color: var(--bg-card, #1f2937);
+  color: var(--text-primary);
+}
 .btn-sm { padding: 8px 14px; font-size: 12px; }
 
 .chat-window {
-  flex: 1;
+  flex: 1 1 auto;
   overflow-y: auto;
   background: rgba(0,0,0,0.2);
   border: 1px solid var(--border);
@@ -574,6 +588,6 @@ onMounted(() => {
 
 @media (max-width: 1024px) {
   .layout { grid-template-columns: 1fr; }
-  .panel:last-child { height: auto; min-height: 500px; }
+  .panel:last-child { height: auto; min-height: 540px; }
 }
 </style>

@@ -5,9 +5,9 @@
     <div class="container">
       <!-- Header -->
       <div class="page-header">
-        <span class="tag tag-purple">四大系列</span>
+        <span class="tag tag-purple">三大系列</span>
         <h1 class="page-title">AI 模型广场 - Gemini镜像 Claude镜像 OpenAI镜像</h1>
-        <p class="page-desc">汇聚全球顶级 AI 模型，提供 Gemini镜像、Claude镜像、OpenAI镜像、OpenAI API 等服务，支持 Google、xAI、OpenAI、Anthropic 四大系列。</p>
+        <p class="page-desc">汇聚全球顶级 AI 模型，提供 Gemini镜像、Claude镜像、OpenAI镜像、OpenAI API 等服务，支持 Google、OpenAI、Anthropic 三大系列。</p>
       </div>
 
       <!-- Series Filters -->
@@ -69,7 +69,6 @@ import { ref, computed, onMounted } from 'vue'
 const modelSeries = [
   { id: 'all', label: '全部', icon: '🌐' },
   { id: 'gemini', label: 'Gemini', icon: '/icon/gemini-color.svg' },
-  { id: 'x-ai', label: 'x-ai', icon: '/icon/grok.svg' },
   { id: 'openai', label: 'OpenAI', icon: '/icon/openai.svg' },
   { id: 'anthropic', label: 'Anthropic', icon: '/icon/claude-color.svg' },
 ]
