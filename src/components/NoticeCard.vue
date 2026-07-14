@@ -140,7 +140,7 @@ onMounted(async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(45, 45, 45, 0.55);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -150,15 +150,15 @@ onMounted(async () => {
 }
 
 .notice-card {
-  background: var(--gradient-card);
-  border: 1px solid var(--border);
+  background: #FFFFFF;
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 960px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 40px rgba(56, 189, 248, 0.1), 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-medium);
   overflow: hidden;
 }
 
@@ -171,12 +171,12 @@ onMounted(async () => {
   align-items: center;
   gap: 12px;
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-  background: rgba(56, 189, 248, 0.05);
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-bg-secondary);
 }
 
 .notice-icon {
-  color: var(--accent-cyan);
+  color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -184,9 +184,9 @@ onMounted(async () => {
 
 .notice-title {
   font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
   flex: 1;
   margin: 0;
 }
@@ -194,7 +194,7 @@ onMounted(async () => {
 .notice-close-btn {
   background: transparent;
   border: none;
-  color: var(--text-secondary);
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 4px;
   display: flex;
@@ -205,15 +205,15 @@ onMounted(async () => {
 }
 
 .notice-close-btn:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
 }
 
 .notice-content {
   padding: 24px;
   font-size: 15px;
-  line-height: 1.7;
-  color: var(--text-primary);
+  line-height: 1.8;
+  color: var(--color-text-primary);
   flex: 1;
   overflow-y: auto;
 }
@@ -227,7 +227,7 @@ onMounted(async () => {
 .notice-content :deep(h6) {
   margin: 0 0 12px 0;
   font-family: var(--font-display);
-  color: var(--text-primary);
+  color: var(--color-text-primary);
 }
 
 .notice-content :deep(h1) { font-size: 1.5em; }
@@ -243,24 +243,26 @@ onMounted(async () => {
 }
 
 .notice-content :deep(a) {
-  color: var(--accent-cyan);
+  color: var(--color-accent);
   text-decoration: none;
 }
 
 .notice-content :deep(a:hover) {
   text-decoration: underline;
+  color: var(--color-text-primary);
 }
 
 .notice-content :deep(code) {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-bg-secondary);
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Fira Code', 'Consolas', monospace;
   font-size: 0.9em;
+  color: var(--color-accent);
 }
 
 .notice-content :deep(pre) {
-  background: rgba(0, 0, 0, 0.3);
+  background: #2D2D2D;
   padding: 12px;
   border-radius: 8px;
   overflow-x: auto;
@@ -270,6 +272,7 @@ onMounted(async () => {
 .notice-content :deep(pre code) {
   background: none;
   padding: 0;
+  color: #F8F6F3;
 }
 
 .notice-content :deep(ul),
@@ -285,14 +288,14 @@ onMounted(async () => {
 .notice-content :deep(blockquote) {
   margin: 12px 0;
   padding: 8px 16px;
-  border-left: 3px solid var(--accent-cyan);
-  background: rgba(56, 189, 248, 0.05);
-  color: var(--text-secondary);
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
 }
 
 .notice-content :deep(hr) {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-border-light);
   margin: 16px 0;
 }
 
@@ -304,13 +307,13 @@ onMounted(async () => {
 
 .notice-content :deep(th),
 .notice-content :deep(td) {
-  border: 1px solid var(--border);
+  border: 1px solid var(--color-border-light);
   padding: 8px 12px;
   text-align: left;
 }
 
 .notice-content :deep(th) {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-bg-secondary);
 }
 
 .notice-footer {
@@ -318,8 +321,8 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  border-top: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-secondary);
 }
 
 .notice-checkbox {
@@ -337,18 +340,19 @@ onMounted(async () => {
 .checkmark {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--text-muted);
+  border: 2px solid var(--color-border);
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: var(--transition);
   position: relative;
+  background: #FFFFFF;
 }
 
 .notice-checkbox input:checked + .checkmark {
-  background: var(--accent-cyan);
-  border-color: var(--accent-cyan);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .notice-checkbox input:checked + .checkmark::after {

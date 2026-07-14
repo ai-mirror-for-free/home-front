@@ -1,6 +1,6 @@
 <template>
   <main class="billing-page">
-    <div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(52,211,153,0.12) 0%,transparent 70%);top:0;right:0;pointer-events:none;"></div>
+    <div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(139,115,85,0.08) 0%,transparent 70%);top:0;right:0;pointer-events:none;"></div>
 
     <div class="container">
       <!-- Header -->
@@ -59,16 +59,20 @@ const billingRules = [
 }
 .page-header {
   text-align: center;
-  padding: 60px 0 48px;
+  padding: 60px 32px;
+  background: linear-gradient(180deg, var(--color-bg-secondary) 0%, var(--color-bg-primary) 100%);
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: 64px;
 }
 .page-title {
   font-family: var(--font-display);
-  font-size: clamp(32px, 4vw, 52px);
-  font-weight: 800;
-  margin: 16px 0 12px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  margin: 16px 0 16px;
   letter-spacing: -0.02em;
+  color: var(--color-text-primary);
 }
-.page-desc { color: var(--text-secondary); font-size: 16px; max-width: 500px; margin: 0 auto; }
+.page-desc { color: var(--color-text-muted); font-size: 1.05rem; max-width: 540px; margin: 0 auto; line-height: 1.8; }
 
 .rules-grid {
   display: grid;
@@ -79,7 +83,7 @@ const billingRules = [
 }
 
 .rule-card {
-  padding: 32px;
+  padding: 36px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -87,29 +91,39 @@ const billingRules = [
 }
 
 .rule-icon {
-  font-size: 48px;
+  font-size: 2.2rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-accent);
+  border-radius: 14px;
   line-height: 1;
 }
 
 .rule-title {
   font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 .rule-desc {
-  font-size: 15px;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  line-height: 1.8;
+  margin: 0;
 }
 
 .billing-note {
   text-align: center;
-  margin-top: 60px;
+  margin-top: 80px;
   padding: 24px;
-  color: var(--text-muted);
-  font-size: 14px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  font-family: var(--font-display);
 }
 
 @media (max-width: 768px) {

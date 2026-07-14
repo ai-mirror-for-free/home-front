@@ -3,25 +3,39 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <div class="logo" style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <path d="M14 2L25 8V20L14 26L3 20V8L14 2Z" stroke="url(#fg)" stroke-width="1.5" fill="rgba(99,102,241,0.15)"/>
-              <path d="M14 8L19 11V17L14 20L9 17V11L14 8Z" fill="url(#fg)"/>
-              <defs>
-                <linearGradient id="fg" x1="3" y1="2" x2="25" y2="26" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#38bdf8"/><stop offset="1" stop-color="#a78bfa"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <span style="font-family:var(--font-display);font-size:20px;font-weight:800;background:var(--gradient-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">chat-keeper</span>
-          </div>
-
+          <div class="logo">chat-keeper</div>
+          <p>汇聚全球顶级 AI 模型，提供 Claude、Gemini、OpenAI 等大模型的稳定访问服务。一个账号，畅享数十款顶尖模型。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <ul>
+            <li><RouterLink to="/models">模型广场</RouterLink></li>
+            <li><RouterLink to="/pricing">定价方案</RouterLink></li>
+            <li><RouterLink to="/experience">体验中心</RouterLink></li>
+            <li><RouterLink to="/billing-rules">计费规则</RouterLink></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>账户</h4>
+          <ul>
+            <li><RouterLink to="/login">登录</RouterLink></li>
+            <li><RouterLink to="/register">注册</RouterLink></li>
+            <li><RouterLink to="/profile">个人中心</RouterLink></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>联系</h4>
+          <ul>
+            <li><a href="#">QQ 客服</a></li>
+            <li><a href="#">邮箱支持</a></li>
+            <li><a href="#">服务状态</a></li>
+          </ul>
         </div>
       </div>
 
       <div class="footer-bottom">
-        <p>© 2025 chat-keeper. 保留所有权利。</p>
-        <!-- <p>ICP备XXXXXXXX号</p> -->
+        <p>© 2026 chat-keeper. 保留所有权利。</p>
+        <p class="muted">Designed for AI Practitioners</p>
       </div>
     </div>
   </footer>
@@ -29,34 +43,85 @@
 
 <style scoped>
 .footer {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  padding: 72px 0 32px;
+  background: #2D2D2D;
+  color: #fff;
+  padding: 80px 0 32px;
   margin-top: auto;
 }
 .footer-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 48px;
-  margin-bottom: 48px;
+  margin-bottom: 56px;
 }
-.footer-desc {
-  color: var(--text-secondary);
-  font-size: 14px;
-  line-height: 1.7;
-  max-width: 260px;
-  margin-bottom: 24px;
+.footer-brand .logo {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: #fff;
+  letter-spacing: 0.01em;
 }
+.footer-brand p {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.92rem;
+  line-height: 1.8;
+  max-width: 340px;
+  margin-bottom: 0;
+}
+.footer-col h4 {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 20px;
+}
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+}
+.footer-col li { margin-bottom: 10px; }
+.footer-col a {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.95rem;
+  transition: color var(--transition);
+}
+.footer-col a:hover { color: #fff; }
+
 .footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 32px;
-  border-top: 1px solid var(--border);
-  color: var(--text-muted);
-  font-size: 13px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
 }
-@media (max-width: 500px) {
-  .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+.footer-bottom .muted {
+  font-style: italic;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+  .footer-brand {
+    grid-column: span 2;
+    max-width: none;
+  }
+}
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-brand { grid-column: span 1; }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
 }
 </style>

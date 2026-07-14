@@ -3,19 +3,7 @@
     <div class="container nav-inner">
       <!-- Logo -->
       <RouterLink to="/" class="logo">
-        <div class="logo-icon">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M14 2L25 8V20L14 26L3 20V8L14 2 25 8Z" stroke="url(#logoGrad)" stroke-width="1.5" fill="rgba(99,102,241,0.15)"/>
-            <path d="M14 8L19 11V17L14 20L9 17V11L14 8Z" fill="url(#logoGrad)"/>
-            <defs>
-              <linearGradient id="logoGrad" x1="3" y1="2" x2="25" y2="26" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#38bdf8"/>
-                <stop offset="1" stop-color="#a78bfa"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <span class="logo-text">chat-keeper</span>
+        <span class="logo-text">chat-keeper<span class="logo-sub">— AI Gateway</span></span>
       </RouterLink>
 
       <!-- Desktop Nav -->
@@ -29,7 +17,6 @@
 
       <!-- Actions -->
       <div class="nav-actions">
-        <!-- 如果用户已登录，显示头像下拉菜单 -->
         <template v-if="userStore.state.isLoggedIn">
           <div class="user-dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <button class="avatar-btn" @click="toggleDropdown" aria-label="User menu">
@@ -38,7 +25,7 @@
                 <img v-else :src="userStore.state.userInfo.avatar" :alt="userStore.state.userInfo.name" />
               </div>
             </button>
-            
+
             <div class="dropdown-menu" :class="{ 'show': showDropdown }">
               <div class="dropdown-header">
                 <div class="avatar-large">
@@ -50,7 +37,7 @@
                   <p>{{ userStore.state.userInfo.email }}</p>
                 </div>
               </div>
-              
+
               <div class="dropdown-body">
                 <RouterLink to="/profile" class="dropdown-item" @click="closeDropdown">
                   <i class="icon-user"></i> 个人中心
@@ -64,7 +51,6 @@
         </template>
         <template v-else>
           <RouterLink to="/login" class="btn btn-ghost">登录</RouterLink>
-          <!-- <RouterLink to="/login" class="btn btn-primary">开始体验</RouterLink> -->
         </template>
       </div>
 
@@ -83,7 +69,7 @@
       <RouterLink to="/experience" class="mobile-link" @click="mobileOpen=false">体验中心</RouterLink>
       <a href="/#features" class="mobile-link" @click="mobileOpen=false">功能特性</a>
       <RouterLink to="/billing-rules" class="mobile-link" @click="mobileOpen=false">计费规则</RouterLink>
-      
+
       <template v-if="userStore.state.isLoggedIn">
         <RouterLink to="/profile" class="mobile-link" @click="mobileOpen=false">个人中心</RouterLink>
         <div class="mobile-actions">
@@ -93,7 +79,6 @@
       <template v-else>
         <div class="mobile-actions">
           <RouterLink to="/login" class="btn btn-outline" style="width:100%;justify-content:center" @click="mobileOpen=false">登录</RouterLink>
-          <!-- <RouterLink to="/register" class="btn btn-primary" style="width:100%;justify-content:center" @click="mobileOpen=false">开始体验</RouterLink> -->
         </div>
       </template>
     </div>
@@ -111,7 +96,6 @@ const showDropdown = ref(false)
 const router = useRouter()
 const userStore = useUserStore()
 
-// 检查是否为管理员
 const isAdmin = computed(() => {
   return userStore.state.isAdmin || localStorage.getItem('adminToken') !== null
 })
@@ -137,8 +121,6 @@ function handleLogoutAndCloseMenu() {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
-  // 在实际应用中，这里应该检查用户的认证状态
-  // 例如从localStorage、Vuex store或API检查认证状态
 })
 onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
@@ -152,14 +134,16 @@ function handleScroll() {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1000;
-  transition: var(--transition);
-  padding: 16px 0;
+  background: rgba(253, 252, 251, 0.92);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--color-border-light);
+  padding: 14px 0;
+  transition: padding var(--transition);
 }
 .nav.scrolled {
-  background: rgba(2, 4, 9, 0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 0;
+  padding: 10px 0;
+  background: rgba(253, 252, 251, 0.96);
 }
 
 .nav-inner {
@@ -175,66 +159,60 @@ function handleScroll() {
   text-decoration: none;
   flex-shrink: 0;
 }
-.logo-icon { display: flex; align-items: center; }
 .logo-text {
   font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 800;
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+}
+.logo-sub {
+  font-weight: 300;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-left: 8px;
+  font-style: italic;
+  letter-spacing: 0.02em;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   list-style: none;
   margin-left: auto;
 }
 .nav-link {
-  padding: 8px 16px;
-  color: var(--text-secondary);
+  position: relative;
+  padding: 8px 14px;
+  color: var(--color-text-secondary);
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  transition: var(--transition);
+  font-size: 0.95rem;
+  font-weight: 400;
+  border-radius: 0;
+  transition: color var(--transition);
 }
-.nav-link:hover, .nav-link.router-link-active {
-  color: var(--text-primary);
-  background: rgba(255,255,255,0.06);
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 14px; right: 14px; bottom: 4px;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform var(--transition);
 }
-
-/* 管理员链接样式 */
-.admin-link {
-  background: linear-gradient(135deg, #6f42c1, #9333ea);
-  color: white;
-  padding: 8px 16px;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
-  transition: var(--transition);
+.nav-link:hover {
+  color: var(--color-text-primary);
 }
-
-.admin-link:hover {
-  background: linear-gradient(135deg, #5a32a3, #7c2d12);
-  transform: translateY(-1px);
+.nav-link:hover::after,
+.nav-link.router-link-active::after {
+  transform: scaleX(1);
 }
-
-.mobile-link.admin-link {
-  color: white;
-  background: linear-gradient(135deg, #6f42c1, #9333ea);
-  border: none;
-  margin-top: 8px;
+.nav-link.router-link-active {
+  color: var(--color-text-primary);
 }
 
-.mobile-link.admin-link:hover {
-  opacity: 0.9;
-  transform: none;
-}
-
-/* 头像按钮样式 */
 .user-dropdown {
   position: relative;
   display: inline-block;
@@ -246,49 +224,41 @@ function handleScroll() {
   cursor: pointer;
   padding: 4px;
   border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: opacity var(--transition);
 }
-
-.avatar-btn:hover {
-  background-color: rgba(255,255,255,0.1);
-}
+.avatar-btn:hover { opacity: 0.8; }
 
 .avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #38bdf8, #a78bfa);
+  background: var(--color-primary);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 500;
   overflow: hidden;
 }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 下拉菜单样式 */
 .dropdown-menu {
   position: absolute;
   right: 0;
-  top: calc(100% + 10px);
+  top: calc(100% + 12px);
   width: 280px;
-  background: var(--bg-card);
+  background: #FFFFFF;
+  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  padding: 16px 0;
+  box-shadow: var(--shadow-medium);
+  padding: 12px 0;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
+  transform: translateY(-8px);
+  transition: all 0.25s ease;
   z-index: 1000;
 }
-
 .dropdown-menu.show {
   opacity: 1;
   visibility: visible;
@@ -298,42 +268,37 @@ function handleScroll() {
 .dropdown-header {
   display: flex;
   align-items: center;
-  padding: 0 20px 16px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 12px;
+  padding: 8px 20px 16px;
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: 8px;
 }
-
 .avatar-large {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #38bdf8, #a78bfa);
+  background: var(--color-primary);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 500;
   margin-right: 12px;
   overflow: hidden;
 }
-
-.avatar-large img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+.avatar-large img { width: 100%; height: 100%; object-fit: cover; }
 
 .user-info h4 {
   margin: 0 0 4px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary);
+  font-family: var(--font-body);
+  color: var(--color-text-primary);
 }
-
 .user-info p {
   margin: 0;
-  font-size: 14px;
-  color: var(--text-secondary);
+  font-size: 13px;
+  color: var(--color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -344,35 +309,27 @@ function handleScroll() {
   display: flex;
   flex-direction: column;
 }
-
 .dropdown-item {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
+  padding: 11px 20px;
   text-decoration: none;
-  color: var(--text-primary);
-  transition: background-color 0.2s;
+  color: var(--color-text-primary);
+  transition: background-color var(--transition);
   border: none;
   background: none;
   width: 100%;
   font-size: 14px;
   text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
 }
-
 .dropdown-item:hover {
-  background-color: rgba(255,255,255,0.06);
-  color: var(--text-primary);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-accent);
 }
-
-.icon-user::before {
-  content: "👤";
-  margin-right: 8px;
-}
-
-.icon-logout::before {
-  content: "🚪";
-  margin-right: 8px;
-}
+.icon-user::before { content: "👤"; margin-right: 10px; font-size: 14px; }
+.icon-logout::before { content: "↩"; margin-right: 10px; font-size: 14px; }
 
 .nav-actions {
   display: flex;
@@ -394,8 +351,8 @@ function handleScroll() {
 .mobile-toggle span {
   display: block;
   width: 22px;
-  height: 2px;
-  background: var(--text-primary);
+  height: 1.5px;
+  background: var(--color-text-primary);
   border-radius: 2px;
   transition: var(--transition);
 }
@@ -407,20 +364,19 @@ function handleScroll() {
   display: none;
   flex-direction: column;
   padding: 16px 24px 24px;
-  border-top: 1px solid var(--border);
-  background: rgba(2, 4, 9, 0.95);
-  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--color-border-light);
+  background: var(--color-bg-primary);
 }
 .mobile-menu.open { display: flex; }
 .mobile-link {
   padding: 14px 0;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   text-decoration: none;
   font-size: 16px;
-  border-bottom: 1px solid var(--border);
-  transition: var(--transition);
+  border-bottom: 1px solid var(--color-border-light);
+  transition: color var(--transition);
 }
-.mobile-link:hover { color: var(--text-primary); }
+.mobile-link:hover { color: var(--color-text-primary); }
 .mobile-actions {
   display: flex;
   flex-direction: column;
@@ -428,8 +384,9 @@ function handleScroll() {
   margin-top: 20px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .nav-links, .nav-actions { display: none; }
   .mobile-toggle { display: flex; }
+  .logo-sub { display: none; }
 }
 </style>
