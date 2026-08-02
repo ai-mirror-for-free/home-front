@@ -19,40 +19,25 @@
           </div>
           <div class="card-body">
             <div class="subscription-badge">
-              <span :class="['tag', 'tag-' + mapPlanLevelToTag(quotaInfo.plan_level)]">
-                {{ formatPlanLevel(quotaInfo.plan_level) }}
-              </span>
+              <span class="tag tag-cyan">Claude Code · 预付费按量</span>
             </div>
-            
+
             <div class="subscription-details">
               <div class="detail-item">
-                <span class="detail-label">到期时间</span>
-                <span class="detail-value">{{ formatExpiredTime(quotaInfo.expired_time) }}</span>
+                <span class="detail-label">计费方式</span>
+                <span class="detail-value">按 Token 使用量计费 (CNY)</span>
               </div>
-              
-              <div class="countdown-section">
-                <div class="countdown-title">剩余时间</div>
-                <div 
-                  :class="[
-                    'countdown-value', 
-                    daysUntilExpiration <= 7 && daysUntilExpiration > 0 ? 'countdown-warning' : ''
-                  ]"
-                >
-                  {{ daysUntilExpiration < 0 ? 'infinity' : daysUntilExpiration }} 天
-                </div>
-              </div>
-            </div>
-            
-            <div class="subscription-status" v-if="daysUntilExpiration <= 0 && !isAdmin">
-              <span class="status-message">您的套餐已过期，请及时续费</span>
             </div>
             
             <div class="subscription-actions">
-              <button @click="goToOpenWebUI" class="btn btn-primary">
+              <button @click="goToClaudeMirror" class="btn btn-primary">
                 开始聊天
               </button>
-              <a href="https://e.tb.cn/h.is8ENECRT7auWfa?tk=1stT58rRcnx" class="btn btn-outline">
-                购买套餐
+              <a href="https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo" class="btn btn-outline">
+                淘宝购买
+              </a>
+              <a href="https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz" class="btn btn-outline">
+                闲鱼购买
               </a>
             </div>
             
@@ -99,47 +84,57 @@
             <h2 class="card-title">使用额度</h2>
           </div>
           <div class="card-body">
-            <div class="quota-stats">
-              <div class="quota-item">
-                <span class="quota-label">剩余额度</span>
-                <span class="quota-value quota-remain">{{ quotaInfo.remain_quota < 0 ? 'infinity' : quotaInfo.remain_quota.toLocaleString() }}</span>
-                <span class="quota-unit">tokens</span>
-              </div>
-              <div class="quota-item">
-                <span class="quota-label">已使用额度</span>
-                <span class="quota-value">{{ quotaInfo.used_quota.toLocaleString() }}</span>
-                <span class="quota-unit">tokens</span>
-              </div>
-              <div class="quota-item">
-                <span class="quota-label">套餐级别</span>
-                <span class="quota-value quota-plan">{{ formatPlanLevel(quotaInfo.plan_level) }}</span>
-              </div>
-              <div class="quota-item">
-                <span class="quota-label">额度使用</span>
-                <div class="quota-progress">
-                  <div class="progress-bar">
-                    <div class="progress-fill" :style="{ width: quotaUsedPercentage + '%' }"></div>
+            <div class="plans-list" v-if="quotaInfo.plans && quotaInfo.plans.length">
+              <div v-for="plan in quotaInfo.plans" :key="plan.type" class="plan-quota-card">
+                <div class="plan-quota-head">
+                  <div class="plan-quota-title">
+                    <span class="plan-quota-name">{{ formatPlanType(plan.type) }}</span>
+                    <span v-if="plan.has_key" class="tag tag-cyan">已开通</span>
+                    <span v-else class="tag tag-gray">未开通</span>
                   </div>
-                  <span class="quota-percentage">{{ quotaUsedPercentage }}%</span>
+                  <span class="plan-quota-currency">{{ quotaInfo.currency || 'CNY' }}</span>
+                </div>
+
+                <div class="plan-quota-balance">
+                  <div class="balance-label">账户余额</div>
+                  <div class="balance-value">
+                    <template v-if="plan.unlimited">
+                      <span class="balance-unlimited">无限</span>
+                    </template>
+                    <template v-else-if="plan.has_key">
+                      <span class="currency-symbol">¥</span>
+                      <span class="amount">{{ Number(plan.balance || 0).toFixed(2) }}</span>
+                    </template>
+                    <template v-else>
+                      <span class="currency-symbol">¥</span>
+                      <span class="amount">0.00</span>
+                    </template>
+                  </div>
+                </div>
+
+                <div class="plan-quota-meta">
+                  <div class="meta-item">
+                    <span class="meta-label">累计充值</span>
+                    <span class="meta-value">
+                      <template v-if="plan.unlimited">—</template>
+                      <template v-else>¥ {{ Number(plan.total_recharged || 0).toFixed(2) }}</template>
+                    </span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">状态</span>
+                    <span class="meta-value">
+                      <template v-if="plan.unlimited">不限量</template>
+                      <template v-else-if="plan.has_key">可用</template>
+                      <template v-else>未开通</template>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-            
-            <div class="model-limits" v-if="quotaInfo.model_limits">
-              <div class="model-limits-header">
-                <span class="model-limits-title">可用模型列表</span>
-              </div>
-              <div class="model-list-wrapper expanded">
-                <div class="model-list">
-                  <div 
-                    v-for="(model, index) in modelLimitsArray" 
-                    :key="index" 
-                    class="model-item"
-                  >
-                    {{ model }}
-                  </div>
-                </div>
-              </div>
+
+            <div v-else class="plans-empty">
+              <span class="plans-empty-icon">💳</span>
+              <p>暂无套餐额度数据</p>
             </div>
           </div>
         </div>
@@ -152,11 +147,8 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { updateUserQuota } from '@/api/register'
+import { updateUserQuota, normalizeQuotaInfo } from '@/api/register'
 import { redeemCode } from '@/api/admin' // 假设redeemCode函数在admin.js中
-import axios from 'axios'
-
-const API_BASE_URL = '/api'
 
 const userStore = useUserStore()
 const isSupportDropdownVisible = ref(false)
@@ -178,107 +170,40 @@ const isAdmin = computed(() => {
   return userInfo.value.role === 'admin'
 })
 
-// 计算距离套餐过期的天数
-const daysUntilExpiration = computed(() => {
-  if (!quotaInfo.value.expired_time) {
-    // 如果没有过期时间，则认为是永久有效的
-    return Infinity
-  }
-  
-  const now = Date.now()
-  const expirationTime = quotaInfo.value.expired_time * 1000 // 转换为毫秒
-  const diffMs = expirationTime - now
-  
-  if (diffMs <= 0) {
-    return 0 // 已过期
-  }
-  
-  // 转换为天数
-  return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
-})
-
 // 客服支持选项
 const supportOptions = [
   {
     title: '在线客服',
     desc: '工作日 9:00-18:00 提供服务',
-    link: '#contact' // 替换为实际链接
+    link: '#contact'
   },
   {
     title: 'QQ群',
     desc: '加入技术支持群获取帮助',
-    link: '#qqgroup' // 替换为实际链接
+    link: '#qqgroup'
   }
 ]
 
-// 将模型限制字符串转换为数组
-const modelLimitsArray = computed(() => {
-  if (!quotaInfo.value.model_limits) return []
-  return quotaInfo.value.model_limits.split(',').map(model => model.trim()).filter(model => model)
-})
-
-// 计算额度使用百分比
-const quotaUsedPercentage = computed(() => {
-  const used = quotaInfo.value.used_quota || 0
-  const remain = quotaInfo.value.remain_quota || 0
-  const total = used + remain
-  if (total === 0) return 0
-  return Math.round((used / total) * 100)
-})
-
-// 格式化套餐级别
-const formatPlanLevel = (planLevel) => {
-  const planMap = {
-    'free': '免费版',
-    'basic': '基础版',
-    'pro': '专业版',
-    'premium': '高级版',
-    'enterprise': '企业版'
+// 格式化套餐类型 (来自后端 plans[].type)
+const formatPlanType = (type) => {
+  const map = {
+    'claude code': 'Claude Code',
   }
-  return planMap[planLevel] || planLevel
-}
-
-// 映射套餐级别到标签类型
-const mapPlanLevelToTag = (planLevel) => {
-  const tagMap = {
-    'free': 'gray',
-    'basic': 'blue',
-    'pro': 'cyan',
-    'premium': 'purple',
-    'enterprise': 'green'
-  }
-  return tagMap[planLevel] || 'gray'
-}
-
-// 格式化过期时间
-const formatExpiredTime = (timestamp) => {
-  if (!timestamp) return '无限制'
-  const date = new Date(timestamp * 1000)
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  return map[type] || type
 }
 
 const toggleSupportDropdown = () => {
   isSupportDropdownVisible.value = !isSupportDropdownVisible.value
 }
 
-// 新增函数：跳转到OpenWebUI
-const goToOpenWebUI = () => {
+const goToClaudeMirror = () => {
   const token = userStore.getToken();
   if (token) {
-    // 获取当前域名，提取主域名后拼接 chat. 前缀
     const currentHostname = window.location.hostname;
     const parts = currentHostname.split('.');
-    // 提取最后两部分作为主域名（如 www.domain.com -> domain.com）
     const mainDomain = parts.slice(-2).join('.');
-    const openWebUIUrl = `https://chat.${mainDomain}/sso`;
-    const redirectUrl = `${openWebUIUrl}?token=${encodeURIComponent(token)}`;
-    window.open(redirectUrl, '_blank');
+    const targetUrl = `https://claude.${mainDomain}/?token=${encodeURIComponent(token)}`;
+    window.open(targetUrl, '_blank');
   } else {
     alert('用户未登录或缺少访问令牌');
   }
@@ -297,43 +222,12 @@ const fetchUserQuota = async () => {
     }
     
     const quotaData = await updateUserQuota({ username, email })
-    userStore.updateQuotaInfo(quotaData)
+    userStore.updateQuotaInfo(normalizeQuotaInfo(quotaData))
   } catch (error) {
     console.error('获取用户额度失败:', error.message)
     // 可以在这里添加错误提示
   } finally {
     loadingQuota.value = false
-  }
-}
-
-// 获取Banner配置
-const fetchBanners = async () => {
-  try {
-    const token = userStore.getToken()
-    if (!token) {
-      console.warn('无法获取Banner：用户未登录或缺少token')
-      return
-    }
-
-    const response = await axios.get(`${API_BASE_URL}/v1/configs/banners`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    console.log('Banner配置获取成功:', response.data)
-    // 可以将banner数据存储到响应式变量中以便在模板中使用
-  } catch (error) {
-    if (error.response && error.response.status === 401) {
-      console.warn('Token已过期或无效，正在退出登录...')
-      // 清空localStorage中的所有信息
-      localStorage.clear()
-      // 调用store的logout方法
-      userStore.logout()
-      // 可以选择重定向到登录页
-      window.location.href = '/login'
-    } else {
-      console.error('获取Banner配置失败:', error.message)
-    }
   }
 }
 
@@ -390,7 +284,6 @@ const handleRedeemCode = async () => {
 onMounted(() => {
   if (userStore.state.isLoggedIn) {
     fetchUserQuota()
-    fetchBanners()
   }
 })
 </script>
@@ -552,44 +445,6 @@ onMounted(() => {
   font-size: 1.1rem;
 }
 
-.countdown-section {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.countdown-title {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin-bottom: 6px;
-}
-
-.countdown-value {
-  color: var(--text-primary);
-  font-weight: 700;
-  font-size: 1.8rem;
-}
-
-.countdown-warning {
-  color: var(--accent-cyan);
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.6; }
-  100% { opacity: 1; }
-}
-
-.subscription-status {
-  padding: 12px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: var(--radius-md);
-  margin-bottom: 20px;
-  text-align: center;
-}
-
 .status-message {
   color: #ef4444;
   font-weight: 500;
@@ -694,130 +549,142 @@ onMounted(() => {
   grid-column: span 1;
 }
 
-.quota-stats {
+.plans-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.quota-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.quota-label {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin-bottom: 6px;
-}
-
-.quota-value {
-  color: var(--text-primary);
-  font-weight: 500;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.quota-remain {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--accent-cyan);
-}
-
-.quota-unit {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-left: 4px;
-}
-
-.quota-plan {
-  text-transform: capitalize;
-}
-
-.quota-progress {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 8px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--gradient-accent);
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.quota-percentage {
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--accent-cyan);
-  min-width: 45px;
-  text-align: right;
-}
-
-.model-limits {
-  margin-top: 20px;
-}
-
-.model-limits-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.model-limits-title {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.model-list-wrapper {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.model-list-wrapper.expanded {
-  max-height: 500px; /* 设置一个足够大的值，根据需要调整 */
-}
-
-.model-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px 0;
-}
-
-.model-item {
+.plan-quota-card {
+  padding: 22px 24px;
   background: var(--bg-card-hover);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.model-count-indicator {
+.plan-quota-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.plan-quota-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.plan-quota-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.tag-gray {
+  color: var(--text-muted);
+  border-color: var(--border);
+  background: rgba(255,255,255,0.04);
+}
+
+.plan-quota-currency {
+  font-size: 0.8rem;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+}
+
+.plan-quota-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 0;
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
+}
+
+.balance-label {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.balance-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--text-primary);
+}
+
+.balance-value .currency-symbol {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.balance-value .amount {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  letter-spacing: -0.01em;
+}
+
+.balance-unlimited {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  background: var(--gradient-accent, linear-gradient(135deg, #38bdf8, #a78bfa));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.02em;
+}
+
+.plan-quota-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meta-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.meta-value {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.plans-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
   text-align: center;
-  padding: 8px 0;
-  background-color: rgba(128, 128, 128, 0.1);
-  border-radius: var(--radius-sm);
-  margin-top: 8px;
+}
+
+.plans-empty-icon {
+  font-size: 2.2rem;
+  opacity: 0.6;
 }
 
 /* 兑换码卡片样式 */

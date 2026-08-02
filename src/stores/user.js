@@ -37,6 +37,9 @@ const restoreState = () => {
       isActive: true
     },
     quotaInfo: {
+      email: '',
+      currency: 'CNY',
+      plans: [],
       remain_quota: 0,
       model_limits: '',
       used_quota: 0,
@@ -157,6 +160,9 @@ export function useUserStore() {
     });
     Object.assign(state.permissions, {});
     Object.assign(state.quotaInfo, {
+      email: '',
+      currency: 'CNY',
+      plans: [],
       remain_quota: 0,
       model_limits: '',
       used_quota: 0,

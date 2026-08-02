@@ -6,6 +6,7 @@ import ForgotPassword from '../views/ForgotPassword.vue'
 import UserProfile from '../views/UserProfile.vue'
 import Models from '../views/Models.vue'
 import Pricing from '../views/Pricing.vue'
+import Plans from '../views/Plans.vue'
 import BillingRules from '../views/BillingRules.vue'
 import Experience from '../views/Experience.vue'
 
@@ -45,6 +46,11 @@ const routes = [
     path: '/pricing',
     name: 'Pricing',
     component: Pricing
+  },
+  {
+    path: '/plans',
+    name: 'Plans',
+    component: Plans
   },
   {
     path: '/billing-rules',

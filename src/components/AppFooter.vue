@@ -4,12 +4,13 @@
       <div class="footer-grid">
         <div class="footer-brand">
           <div class="logo">chat-keeper</div>
-          <p>汇聚全球顶级 AI 模型，提供 Claude、Gemini、OpenAI 等大模型的稳定访问服务。一个账号，畅享数十款顶尖模型。</p>
+          <p>专注 Claude 全系大模型，提供 Claude 镜像与 API 套餐两种使用方式。一个账号，畅享 Claude 顶尖模型。</p>
         </div>
         <div class="footer-col">
           <h4>产品</h4>
           <ul>
             <li><RouterLink to="/models">模型广场</RouterLink></li>
+            <li><RouterLink to="/plans">套餐介绍</RouterLink></li>
             <li><RouterLink to="/pricing">定价方案</RouterLink></li>
             <li><RouterLink to="/experience">体验中心</RouterLink></li>
             <li><RouterLink to="/billing-rules">计费规则</RouterLink></li>

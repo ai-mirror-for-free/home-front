@@ -4,18 +4,19 @@
     <section class="hero">
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="container hero-content">
-        <span class="hero-eyebrow">{{ currentAnnouncement.content || '全新发布 — xAI、Anthropic、Claude、Gemini、OpenAI 国际顶级模型现已上线' }}</span>
+        <span class="hero-eyebrow">全新发布 — Claude 全系大模型镜像与 API 套餐现已上线</span>
         <h1 class="hero-title">
-          一座汇聚全球顶级<br/>
-          <span class="hero-title-accent">AI 智能模型</span>的桥梁
+          Claude 的稳定访问<br/>
+          与 <span class="hero-title-accent">各厂商模型的API 接入</span>
         </h1>
         <p class="hero-subtitle">
-          专注提供 <strong>Claude 镜像</strong>、<strong>Gemini 镜像</strong>、<strong>OpenAI 镜像</strong> 与 <strong>OpenAI API</strong> 服务。
-          一个账号，畅享 GPT、Claude、Gemini、Grok 等数十款顶尖大模型。
+          专注提供 <strong>Claude 镜像</strong> 与 <strong>API 套餐</strong> 服务。
+          一个账号，即可畅享 Claude 全系顶尖大模型。
           <strong>国内直连</strong>，无需翻墙，按需付费。
         </p>
         <div class="hero-cta">
           <RouterLink to="/login" class="btn btn-primary btn-lg">立即体验</RouterLink>
+          <RouterLink to="/plans" class="btn btn-outline btn-lg">套餐介绍</RouterLink>
           <RouterLink to="/models" class="btn btn-outline btn-lg">查看所有模型</RouterLink>
         </div>
         <div class="hero-stats">
@@ -37,69 +38,53 @@
       </div>
     </section>
 
-    <!-- Models Showcase -->
-    <section class="section" id="models">
+    
+
+    <!-- Plans Preview Section -->
+    <section class="section" id="features">
       <div class="container">
         <div class="section-header">
-          <span class="tag">模型广场</span>
-          <h2>接入业界最强 AI 模型镜像</h2>
-          <p>从文字创作到代码生成，从图像理解到多模态交互，所有顶级模型一键可达。</p>
+          <span class="tag">套餐介绍</span>
+          <h2>两大服务，按需选择</h2>
+          <p>既可以直接使用 Claude 镜像站点，也可以用 API Key 接入 Claude / Gemini / OpenAI 等大模型接口。</p>
         </div>
 
-        <div class="models-grid">
-          <div v-for="m in featuredModels" :key="m.id" class="model-card card">
-            <div class="model-card-header">
-              <div class="model-avatar" :style="{ background: m.solidBg }">
-                <span>{{ m.emoji }}</span>
-              </div>
-              <div class="model-meta">
-                <span class="model-provider">{{ m.provider }}</span>
-                <h3 class="model-name">{{ m.name }}</h3>
-              </div>
-              <span class="tag" :class="m.tagClass">{{ m.tag }}</span>
+        <div class="plans-preview-grid">
+          <div class="plan-preview card">
+            <div class="plan-preview-head">
+              <div class="plan-preview-icon" style="background: rgba(184,116,75,0.15);">🪞</div>
+              <span class="tag tag-cyan">面向用户</span>
             </div>
-            <p class="model-desc">{{ m.desc }}</p>
-            <div class="model-caps">
-              <span v-for="c in m.caps" :key="c" class="cap-chip">{{ c }}</span>
+            <h3>Claude 镜像服务</h3>
+            <p>本站直接提供 Claude 官方镜像站点，国内直连访问，无需翻墙、无需 API Key，注册即用。</p>
+            <ul class="plan-preview-points">
+              <li>Web 端直接对话，使用体验与 Claude 官网一致</li>
+              <li>覆盖 Claude 全系模型 (Opus / Sonnet / Haiku)</li>
+              <li>采用额度制，无 5 小时额度限制</li>
+              <li>登录账号即可使用，无需信用卡</li>
+            </ul>
+            <RouterLink to="/plans#mirror" class="plan-preview-link">了解镜像服务 →</RouterLink>
+          </div>
+
+          <div class="plan-preview card">
+            <div class="plan-preview-head">
+              <div class="plan-preview-icon" style="background: rgba(56,189,248,0.15);">🔌</div>
+              <span class="tag tag-purple">面向开发者</span>
             </div>
-            <div class="model-footer">
-              <span class="model-ctx">{{ m.ctx }}</span>
-              <RouterLink to="/register" class="model-link">立即使用 →</RouterLink>
-            </div>
+            <h3>API 接口服务</h3>
+            <p>提供 Claude / Gemini / OpenAI 等大模型的标准 API 接口，对接自有应用与工作流。</p>
+            <ul class="plan-preview-points">
+              <li><strong>Chat 接口</strong>：对话 / 文本生成 / 工具调用</li>
+              <li><strong>Image 接口</strong>：图像生成与编辑 (独立计费)</li>
+              <li>两类接口对应不同的 API Key，不可混用</li>
+              <li>按官方原价计费，可前往各厂商官网查询</li>
+            </ul>
+            <RouterLink to="/plans#api" class="plan-preview-link">了解 API 服务 →</RouterLink>
           </div>
         </div>
 
         <div class="section-cta">
-          <RouterLink to="/models" class="btn btn-outline btn-lg">查看全部 {{ modelCount }} 模型</RouterLink>
-        </div>
-      </div>
-    </section>
-
-    <!-- Social Proof -->
-    <section class="section section-alt social-proof">
-      <div class="container">
-        <div class="testimonial">
-          <p class="testimonial-quote">「一个 chat-keeper 账号，让我们团队把 Claude、Gemini、GPT 全部接入到 OpenWebUI，部署成本几乎为零，国内访问体验却有了质的飞跃。」</p>
-          <p class="testimonial-author">— 研发负责人，<span class="testimonial-company">某 AI 创业团队</span></p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="section" id="features">
-      <div class="container">
-        <div class="section-header">
-          <span class="tag">功能特性</span>
-          <h2>为什么选择 chat-keeper</h2>
-          <p>为开发者与团队打造，稳定、透明、可控的 AI 模型访问体验。</p>
-        </div>
-
-        <div class="features-grid">
-          <div v-for="f in features" :key="f.title" class="feature-card card">
-            <div class="feature-icon">{{ f.icon }}</div>
-            <h3>{{ f.title }}</h3>
-            <p>{{ f.desc }}</p>
-          </div>
+          <RouterLink to="/plans" class="btn btn-primary btn-lg">查看完整套餐介绍</RouterLink>
         </div>
       </div>
     </section>
@@ -125,14 +110,14 @@
             <div class="use-case-icon">🎨</div>
             <div>
               <h3>创意工作室</h3>
-              <p>用 Claude 与 Gemini 完成脚本、文案与多语种内容生成，让 AI 辅助你完成从灵感到成品的全过程。</p>
+              <p>用 Claude 完成脚本、文案与多语种内容生成，让 AI 辅助你完成从灵感到成品的全过程。</p>
             </div>
           </div>
           <div class="use-case card">
             <div class="use-case-icon">🏢</div>
             <div>
               <h3>企业团队</h3>
-              <p>在国内直连的环境下为团队提供 OpenWebUI、API 接入与统一计费，让 AI 真正进入工作流。</p>
+              <p>在国内直连的环境下为团队提供 Claude 镜像、API 接入与统一计费，让 AI 真正进入工作流。</p>
             </div>
           </div>
         </div>
@@ -161,8 +146,8 @@
           </div>
           <div class="feature-card card">
             <div class="feature-icon">⚙️</div>
-            <h3>OpenWebUI 对接</h3>
-            <p>无缝集成 OpenWebUI，保留熟悉的交互界面，底层换装顶级模型。</p>
+            <h3>Claude 镜像直连</h3>
+            <p>本站直接接入 Claude 镜像，无需 OpenWebUI，开箱即用、稳定可靠。</p>
           </div>
         </div>
       </div>
@@ -172,8 +157,8 @@
     <section class="section">
       <div class="container">
         <div class="cta-block">
-          <h2>按需付费，灵活选择</h2>
-          <p>从个人到企业，我们提供匹配每个场景的套餐方案。所有计划均包含免费额度，无隐藏收费。</p>
+          <h2>两种套餐，按需选择</h2>
+          <p>提供 <strong>Claude 镜像套餐</strong>（Web 端直接使用）与 <strong>API 套餐</strong>（按量计费对接自有应用），所有计划均包含免费额度，无隐藏收费。</p>
           <RouterLink to="/pricing" class="btn btn-primary btn-lg">查看定价方案</RouterLink>
         </div>
       </div>
@@ -182,58 +167,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const modelCount = ref('50+')
-
-const announcements = ref([])
-const currentAnnouncementIndex = ref(0)
-const currentAnnouncement = ref({ content: '' })
-let announcementTimer = null
-
-function formatTimestamp(timestamp) {
-  const date = new Date(timestamp * 1000)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-async function fetchAnnouncements() {
-  try {
-    const response = await fetch('/api/v1/configs/banners')
-    if (response.ok) {
-      const data = await response.json()
-      if (Array.isArray(data) && data.length > 0) {
-        announcements.value = data.sort((a, b) => b.timestamp - a.timestamp).map(item => ({
-          id: item.id,
-          type: item.type || 'info',
-          content: `${formatTimestamp(item.timestamp)} ${item.content}`,
-        }))
-        if (announcements.value.length > 0) {
-          currentAnnouncement.value = announcements.value[0]
-        }
-      }
-    }
-  } catch (error) {
-    console.log('获取公告失败，使用默认内容')
-  }
-}
-
-function startAnnouncementScroll() {
-  if (announcements.value.length <= 1) return
-  announcementTimer = setInterval(() => {
-    currentAnnouncementIndex.value = (currentAnnouncementIndex.value + 1) % announcements.value.length
-    currentAnnouncement.value = announcements.value[currentAnnouncementIndex.value]
-  }, 5000)
-}
-
-function stopAnnouncementScroll() {
-  if (announcementTimer) {
-    clearInterval(announcementTimer)
-    announcementTimer = null
-  }
-}
 
 async function fetchModelCount() {
   try {
@@ -251,74 +187,8 @@ async function fetchModelCount() {
 
 onMounted(() => {
   fetchModelCount()
-  fetchAnnouncements().then(() => {
-    startAnnouncementScroll()
-  })
 })
 
-onUnmounted(() => {
-  stopAnnouncementScroll()
-})
-
-const featuredModels = [
-  {
-    id: 1, provider: 'OpenAI', name: 'GPT-5.4',
-    emoji: '🤖', solidBg: '#10a37f',
-    tag: '多模态', tagClass: 'tag-green',
-    desc: '最强大的多模态模型，支持文字、图像、语音理解与生成，处理复杂任务游刃有余。',
-    caps: ['文本生成', '图像理解', '代码', '推理'],
-    ctx: '128K 上下文'
-  },
-  {
-    id: 2, provider: 'Anthropic', name: 'Claude Opus 4.7',
-    emoji: '🧠', solidBg: '#B8743E',
-    tag: '推理强', tagClass: 'tag-purple',
-    desc: '专注于安全与深度推理，超长上下文处理能力卓越，适合文档分析与复杂逻辑任务。',
-    caps: ['深度推理', '文档分析', '创作', '代码'],
-    ctx: '200K 上下文'
-  },
-  {
-    id: 3, provider: 'Google', name: 'Gemini 3.1 Pro',
-    emoji: '💫', solidBg: '#4285f4',
-    tag: '超长', tagClass: 'tag-cyan',
-    desc: '谷歌最新旗舰模型，拥有超长上下文窗口，多语言能力出色，擅长数据分析与科学推理。',
-    caps: ['超长上下文', '多语言', '数据分析', '代码'],
-    ctx: '1M 上下文'
-  },
-  {
-    id: 4, provider: 'xAI', name: 'Grok 4.20',
-    emoji: '🔥', solidBg: '#1A1A1A',
-    tag: '旗舰', tagClass: 'tag-orange',
-    desc: 'xAI 最新旗舰模型，深度推理能力卓越，实时信息获取能力强。',
-    caps: ['深度推理', '实时信息', '代码'],
-    ctx: '128K 上下文'
-  },
-  {
-    id: 6, provider: 'Anthropic', name: 'Claude Sonnet 4.6',
-    emoji: '📝', solidBg: '#9B6A3F',
-    tag: '均衡', tagClass: 'tag-green',
-    desc: 'Anthropic 均衡旗舰，深度推理卓越，长文档处理能力出众。',
-    caps: ['推理', '文档', '创作', '代码'],
-    ctx: '200K 上下文'
-  },
-  {
-    id: 7, provider: 'Anthropic', name: 'Claude Opus 4.6',
-    emoji: '🧠', solidBg: '#8B5A2B',
-    tag: '旗舰', tagClass: 'tag-purple',
-    desc: 'Anthropic 旗舰模型，深度推理能力卓越，超长上下文处理能力出众。',
-    caps: ['深度推理', '文档分析', '创作', '代码'],
-    ctx: '200K 上下文'
-  },
-]
-
-const features = [
-  { icon: '⚡', title: '流畅响应体验', desc: '多路由智能调度，确保模型调用稳定流畅，响应速度满足日常使用需求。' },
-  { icon: '🔒', title: '隐私安全保障', desc: '对话内容不用于训练，端到端加密传输，合规存储，保护您的每一次交流。' },
-  { icon: '🌐', title: '国内直连访问', desc: '无需 VPN，国内服务器直连，稳定可靠，随时随地访问顶尖境外模型。' },
-  { icon: '💳', title: '透明按量计费', desc: '费用明细清晰透明，用多少付多少，无需预付，按月结算更省心。' },
-  { icon: '🛠', title: 'OpenWebUI 对接', desc: '无缝集成 OpenWebUI，保留熟悉的交互界面，底层换装顶级模型，体验大幅提升。' },
-  { icon: '💬', title: 'QQ 客服支持', desc: '遇到问题可通过 QQ 联系客服，我们会在工作时段尽快回复解答。' }
-]
 </script>
 
 <style scoped>
@@ -527,6 +397,89 @@ const features = [
 }
 .model-link:hover { color: var(--color-text-primary); }
 
+/* PLANS PREVIEW */
+.plans-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 980px;
+  margin: 0 auto;
+}
+.plan-preview {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: all var(--transition);
+}
+.plan-preview:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+  border-color: var(--color-accent-warm);
+}
+.plan-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.plan-preview-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.plan-preview h3 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+.plan-preview > p {
+  color: var(--color-text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.8;
+  margin: 0;
+}
+.plan-preview-points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.plan-preview-points li {
+  position: relative;
+  padding-left: 22px;
+  color: var(--color-text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+.plan-preview-points li::before {
+  content: '✓';
+  position: absolute;
+  left: 0; top: 0;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+.plan-preview-points strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+.plan-preview-link {
+  margin-top: auto;
+  font-size: 0.95rem;
+  color: var(--color-accent);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.plan-preview-link:hover { color: var(--color-text-primary); }
+
 /* SOCIAL PROOF */
 .social-proof { text-align: center; }
 .testimonial { max-width: 820px; margin: 0 auto; }
@@ -637,6 +590,7 @@ const features = [
 /* Responsive */
 @media (max-width: 1024px) {
   .models-grid, .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .plans-preview-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .hero { padding-top: 120px; min-height: auto; }
@@ -645,5 +599,7 @@ const features = [
   .models-grid, .features-grid { grid-template-columns: 1fr; }
   .use-case { flex-direction: column; padding: 28px; }
   .model-card { padding: 24px; }
+  .plan-preview { padding: 28px; }
+  .section-cta .btn { display: block; margin: 8px auto; }
 }
 </style>

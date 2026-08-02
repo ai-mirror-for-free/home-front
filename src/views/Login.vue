@@ -101,21 +101,23 @@ const showPwd = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-const modelPills = ['xAI', 'Anthropic', 'Gemini', 'OpenAI']
+const modelPills = ['Claude Opus', 'Claude Sonnet', 'Claude Haiku', 'API']
 
 async function handleLogin() {
   loading.value = true
   error.value = ''
-  
+
   try {
-    // 调用登录API
-    const response = await fetch('/api/v1/auths/signin', {
+    // 调用登录API（claude-web 后端：/api/v1/auth/login）
+    // 后端用 username/password 登录，内部用 NewAPI 验证密码后回 email，
+    // 返回 access_token / refresh_token / session_id 等。
+    const response = await fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        email: form.value.email,
+        username: form.value.email,  // home-front 登录表单字段叫 email，但 claude-web 后端字段叫 username
         password: form.value.password
       })
     })
@@ -124,7 +126,7 @@ async function handleLogin() {
       const errorData = await response.json().catch(() => ({}))
       // 检查错误信息中的detail字段，显示更友好的错误提示
       if (errorData.detail && typeof errorData.detail === 'string') {
-        if (errorData.detail.includes('email or password') || errorData.detail.includes('邮箱') || errorData.detail.includes('密码')) {
+        if (errorData.detail.includes('username') || errorData.detail.includes('password') || errorData.detail.includes('用户名') || errorData.detail.includes('密码')) {
           throw new Error('用户名或密码错误')
         }
       }
@@ -132,30 +134,54 @@ async function handleLogin() {
     }
 
     const data = await response.json()
-    
-    // 使用用户状态管理登录
+
+    // 把 claude-web 后端返回映射成 home-front 原有结构。
+    // home-front 下游（userStore / router 守卫 / UserProfile）都依赖以下字段：
+    //   token, token_type, expires_at, id, name, email, role, profile_image_url, permissions
+    const accessToken = data.access_token
+    const refreshToken = data.refresh_token
+
+    // 从 JWT 的 exp claim 解析 expires_at（秒 → ISO 字符串），UI 兼容旧格式
+    let expiresAt = null
+    try {
+      const payload = accessToken.split('.')[1]
+      const b64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+      const json = decodeURIComponent(
+        Array.from(atob(b64), (c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0')).join('')
+      )
+      const exp = JSON.parse(json).exp
+      if (typeof exp === 'number') {
+        expiresAt = new Date(exp * 1000).toISOString()
+      }
+    } catch (_) { /* ignore: 解析失败不阻塞登录 */ }
+
+    // 单独再存一份 refresh_token / session_id，给将来扩展用；不影响当前逻辑
+    if (refreshToken) localStorage.setItem('refresh_token', refreshToken)
+    if (data.session_id) localStorage.setItem('currentSessionId', data.session_id)
+
+    // 使用用户状态管理登录（沿用原 userStore.login 签名）
     login(
       {
-        id: data.id,
-        name: data.name,
+        id: data.user_id,
+        name: data.username,
         email: data.email,
-        role: data.role,
-        profile_image_url: data.profile_image_url,
-        initials: data.name?.charAt(0).toUpperCase() || data.email?.charAt(0).toUpperCase(),
-        avatar: data.profile_image_url
+        role: 'user',  // claude-web 后端无 role 字段，home-front UI 默认 "user"
+        profile_image_url: data.avatar_url,
+        initials: (data.display_name || data.username || data.email || '').charAt(0).toUpperCase(),
+        avatar: data.avatar_url
       },
       {
-        token: data.token,
-        token_type: data.token_type,
-        expires_at: data.expires_at
+        token: accessToken,
+        token_type: data.token_type || 'bearer',
+        expires_at: expiresAt
       },
-      data.permissions
+      {}  // claude-web 后端无 permissions，home-front 默认空对象
     )
 
     // 保存用户名和密码到 localStorage，用于兑换激活码
     localStorage.setItem('userCredentials', JSON.stringify({
-      username: data.name,
-      email: form.value.email,
+      username: data.username,
+      email: data.email,
       password: form.value.password
     }))
 

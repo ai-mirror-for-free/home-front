@@ -7,7 +7,7 @@
       <div class="page-header">
         <span class="tag tag-green">计费规则</span>
         <h1 class="page-title">计费规则说明</h1>
-        <p class="page-desc">了解我们的计费规则，合理规划您的使用额度。</p>
+        <p class="page-desc">本站提供 Claude 镜像服务与 API 接口服务两种形态，计费方式各有不同，使用前请仔细阅读。</p>
       </div>
 
       <!-- Rules List -->
@@ -31,21 +31,21 @@
 const billingRules = [
   {
     id: 'rule-1',
-    icon: '⏰',
-    title: '额度过期规则',
-    description: '请在额度时间内将额度用完，过期后将不可使用。'
+    icon: '🔑',
+    title: 'API Key 分类',
+    description: 'API 接口分为 Chat 接口与 Image 接口两种，两种接口之间使用不同的 API Key，且 Key 之间不通用，余额也无法互通。请根据实际场景分别申请对应的 Key。'
   },
   {
     id: 'rule-2',
-    icon: '💾',
-    title: '未使用完的额度',
-    description: '未使用完的额度本身不会消失，但是重新使用需要购买新套餐，过期时间以新购买套餐为准。'
+    icon: '💱',
+    title: 'API 套餐按官方原价计费',
+    description: '所有的 API 套餐可使用模型按官方 API 原价计费，您可以自行前往 Claude / Gemini / OpenAI 等官网查询最新模型价格，本站不额外加价。'
   },
   {
     id: 'rule-3',
-    icon: '🔄',
-    title: '额度继承',
-    description: '额度会自动继承到新购买的套餐上。'
+    icon: '🪙',
+    title: 'Claude 镜像套餐额度制',
+    description: 'Claude 镜像套餐目前采用额度制，我们按 Claude 官方预估的对话次数折算为 RMB 现价，本质上和 Claude Pro 套餐价格一致，也没有 5 小时额度限制，您可以按需充值使用。'
   }
 ]
 </script>
@@ -72,13 +72,13 @@ const billingRules = [
   letter-spacing: -0.02em;
   color: var(--color-text-primary);
 }
-.page-desc { color: var(--color-text-muted); font-size: 1.05rem; max-width: 540px; margin: 0 auto; line-height: 1.8; }
+.page-desc { color: var(--color-text-muted); font-size: 1.05rem; max-width: 640px; margin: 0 auto; line-height: 1.8; }
 
 .rules-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 24px;
-  max-width: 900px;
+  max-width: 820px;
   margin: 0 auto;
 }
 

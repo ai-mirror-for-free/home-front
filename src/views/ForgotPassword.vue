@@ -211,7 +211,7 @@ const countdown = ref(0)
 const canSendCode = ref(true)
 const codeSentMessage = ref('')
 
-const modelPills = ['xAI', 'Anthropic', 'Gemini', 'OpenAI']
+const modelPills = ['Claude Opus', 'Claude Sonnet', 'Claude Haiku', 'API']
 
 // 密码强度计算
 const pwdStrength = computed(() => {

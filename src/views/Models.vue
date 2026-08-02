@@ -5,9 +5,9 @@
     <div class="container">
       <!-- Header -->
       <div class="page-header">
-        <span class="tag tag-purple">三大系列</span>
-        <h1 class="page-title">AI 模型广场 - Gemini镜像 Claude镜像 OpenAI镜像</h1>
-        <p class="page-desc">汇聚全球顶级 AI 模型，提供 Gemini镜像、Claude镜像、OpenAI镜像、OpenAI API 等服务，支持 Google、OpenAI、Anthropic 三大系列。</p>
+        <span class="tag tag-purple">模型广场</span>
+        <h1 class="page-title">AI 模型广场 - Claude/Gemini/ChatGPT 全系模型</h1>
+        <p class="page-desc">汇聚全球顶级 AI 模型，提供 Claude 镜像与 API 套餐服务，专注 Claude 全系大模型，稳定访问、按需付费。</p>
       </div>
 
       <!-- Series Filters -->
@@ -33,7 +33,7 @@
       <div v-else class="models-grid">
         <div v-for="m in filteredModels" :key="m.id" class="model-card card">
           <div class="mc-header">
-            <div class="mc-avatar" :style="{ background: m.gradient }">
+            <div class="mc-avatar">
               <img :src="getModelIcon(m.series)" :alt="m.provider" class="model-icon" />
             </div>
             <div class="mc-info">
@@ -55,8 +55,11 @@
       <div class="subscribe-cta">
         <div class="cta-content">
           <h2>解锁全部模型</h2>
-          <p>前往淘宝购买订阅套餐，获取更多模型访问权限</p>
-          <a href="https://e.tb.cn/h.is8ENECRT7auWfa?tk=1stT58rRcnx" target="_blank" class="btn btn-primary">前往淘宝订阅</a>
+          <p>前往淘宝或闲鱼购买订阅套餐，获取更多模型访问权限</p>
+          <div class="cta-buttons">
+            <a href="https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo" target="_blank" class="btn btn-primary">前往淘宝订阅</a>
+            <a href="https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz" target="_blank" class="btn btn-outline">前往闲鱼订阅</a>
+          </div>
         </div>
       </div>
     </div>
@@ -265,7 +268,6 @@ onMounted(() => {
 .mc-header { display: flex; align-items: center; gap: 12px; }
 .mc-avatar {
   width: 48px; height: 48px;
-  border-radius: var(--radius-md);
   display: flex; align-items: center; justify-content: center;
   font-size: 24px; flex-shrink: 0;
   overflow: hidden;
@@ -311,6 +313,12 @@ onMounted(() => {
   color: var(--color-text-muted);
   font-size: 1.05rem;
   margin-bottom: 28px;
+}
+.cta-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .loading-grid { grid-template-columns: repeat(3, 1fr); }

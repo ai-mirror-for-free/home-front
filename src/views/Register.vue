@@ -179,7 +179,7 @@ const verificationSent = ref(false) // 是否已发送过验证码
 
 const perks = [
   { icon: '🎁', text: '新用户注册即送 5w 体验额度' },
-  { icon: '⚡', text: '立即访问 GPT、Claude、Gemini、xAI(Grok)' },
+  { icon: '⚡', text: '立即访问 Claude 全系模型 (Opus / Sonnet / Haiku)' },
   { icon: '🔒', text: '数据加密保护，隐私安全保障' },
   { icon: '🌍', text: '国内直连，无需 VPN，随时可用' },
   { icon: '💳', text: '免费计划包含一天体验时间，无需信用卡' },

@@ -86,7 +86,6 @@ export async function updateUserQuota({ username, email }) {
       // 服务器返回了错误响应
       const data = error.response.data
       if (data.detail && Array.isArray(data.detail)) {
-        // Pydantic 验证错误
         throw new Error(data.detail[0].msg || '查询额度失败')
       } else if (data.message) {
         throw new Error(data.message)
@@ -94,12 +93,32 @@ export async function updateUserQuota({ username, email }) {
         throw new Error('查询额度失败：' + JSON.stringify(data))
       }
     } else if (error.request) {
-      // 请求已发出但没有收到响应
       throw new Error('网络错误，请检查网络连接')
     } else {
-      // 其他错误
       throw new Error(error.message || '查询额度失败')
     }
+  }
+}
+
+// 提取首选套餐（claude code）
+export function pickClaudeCodePlan(quotaResp) {
+  if (!quotaResp || !Array.isArray(quotaResp.plans)) return null
+  return quotaResp.plans.find(p => p.type === 'claude code') || quotaResp.plans[0] || null
+}
+
+// 把新接口返回结构归一为 store.quotaInfo 字段，方便兼容旧 UI 引用
+// 同时保留原始 plans 列表
+export function normalizeQuotaInfo(quotaResp) {
+  const plan = pickClaudeCodePlan(quotaResp)
+  return {
+    email: quotaResp?.email || '',
+    currency: quotaResp?.currency || 'CNY',
+    plans: Array.isArray(quotaResp?.plans) ? quotaResp.plans : [],
+    remain_quota: plan ? (plan.unlimited ? -1 : (plan.balance || 0)) : 0,
+    model_limits: '',
+    used_quota: 0,
+    expired_time: 0,
+plan_level: plan && plan.has_key ? 'claude code' : ''
   }
 }
 

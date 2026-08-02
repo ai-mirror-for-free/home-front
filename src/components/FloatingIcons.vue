@@ -28,8 +28,11 @@
         </div>
       </Transition>
     </div>
-    <a href="https://e.tb.cn/h.is8ENECRT7auWfa?tk=1stT58rRcnx" target="_blank" class="floating-icon" title="淘宝店铺">
+    <a href="https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo" target="_blank" class="floating-icon" title="淘宝店铺">
       <img src="/icon/taobao.svg" alt="淘宝" />
+    </a>
+    <a href="https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz" target="_blank" class="floating-icon floating-icon-text" title="闲鱼店铺">
+      <span class="floating-icon-emoji">🐟</span>
     </a>
   </div>
 </template>
@@ -115,6 +118,10 @@ onUnmounted(() => {
   width: 28px;
   height: 28px;
   object-fit: contain;
+}
+.floating-icon-text .floating-icon-emoji {
+  font-size: 22px;
+  line-height: 1;
 }
 
 .qq-popup {
