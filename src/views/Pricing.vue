@@ -53,15 +53,6 @@
               <span>{{ f.text }}</span>
             </li>
           </ul>
-
-          <!-- Available Models -->
-          <div class="models-section">
-            <h4 class="models-title">可用模型</h4>
-            <div class="models-list">
-              <span v-for="model in currentPlan.models" :key="model" class="model-chip">{{ formatModelName(model) }}</span>
-              <span v-if="!currentPlan.models.length" class="model-chip model-chip-muted">加载中...</span>
-            </div>
-          </div>
         </div>
       </div>
 

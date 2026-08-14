@@ -70,13 +70,12 @@
 import { ref, computed, onMounted } from 'vue'
 
 const modelSeries = [
-  { id: 'all', label: '全部', icon: '🌐' },
   { id: 'gemini', label: 'Gemini', icon: '/icon/gemini-color.svg' },
   { id: 'openai', label: 'OpenAI', icon: '/icon/openai.svg' },
   { id: 'anthropic', label: 'Anthropic', icon: '/icon/claude-color.svg' },
 ]
 
-const activeSeries = ref('all')
+const activeSeries = ref('gemini')
 const allModels = ref([])
 const loading = ref(true)
 
@@ -200,7 +199,7 @@ async function fetchModels() {
 }
 
 const filteredModels = computed(() => {
-  let models = activeSeries.value === 'all' ? allModels.value : allModels.value.filter(m => m.series === activeSeries.value)
+  let models = allModels.value.filter(m => m.series === activeSeries.value)
   return [...models].sort((a, b) => extractVersion(b.name) - extractVersion(a.name))
 })
 

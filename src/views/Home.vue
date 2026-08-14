@@ -7,7 +7,7 @@
         <span class="hero-eyebrow">全新发布 — Claude 全系大模型镜像与 API 套餐现已上线</span>
         <h1 class="hero-title">
           Claude 的稳定访问<br/>
-          与 <span class="hero-title-accent">各厂商模型的API 接入</span>
+          与 <span class="hero-title-accent">主流模型的API 接入</span>
         </h1>
         <p class="hero-subtitle">
           专注提供 <strong>Claude 镜像</strong> 与 <strong>API 套餐</strong> 服务。

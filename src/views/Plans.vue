@@ -28,9 +28,9 @@
           <div class="info-card card">
             <h3>支持模型</h3>
             <ul>
-              <li>Claude Opus 4.8 / 4.7 / 4.6 (旗舰推理)</li>
-              <li>Claude Sonnet 5 / 4.6 (均衡首选)</li>
-              <li>Claude Haiku 5 / 4.5 (快速响应)</li>
+              <li>Claude Opus 最新模型(旗舰推理)</li>
+              <li>Claude Sonnet 最新模型 (均衡首选)</li>
+              <li>Claude Haiku 最新模型 (快速响应)</li>
             </ul>
           </div>
           <div class="info-card card">

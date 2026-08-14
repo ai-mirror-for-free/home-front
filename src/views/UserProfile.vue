@@ -30,15 +30,15 @@
             </div>
             
             <div class="subscription-actions">
-              <button @click="goToClaudeMirror" class="btn btn-primary">
-                开始聊天
-              </button>
               <a href="https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo" class="btn btn-outline">
                 淘宝购买
               </a>
               <a href="https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz" class="btn btn-outline">
                 闲鱼购买
               </a>
+              <button @click="goToClaudeMirror" class="btn btn-primary">
+                开始聊天
+              </button>
             </div>
             
             <!-- 兑换码兑换区域 -->
@@ -139,6 +139,28 @@
           </div>
         </div>
 
+        <!-- API 套餐介绍卡片 -->
+        <div class="card api-plan-card">
+          <div class="card-header">
+            <h2 class="card-title">API 套餐介绍</h2>
+          </div>
+          <div class="card-body">
+            <p class="api-plan-desc">
+              如果您需要 API 自行接入自己的 AI 应用，或用于开发、自动化脚本、批量调用等场景，请购买 API 套餐。
+            </p>
+            <ul class="api-plan-features">
+              <li>支持 Claude，OpenAI，Gemini 等多模型</li>
+              <li>按 Token 实时计费，余额永久有效</li>
+              <li>高并发稳定可用，提供详细调用日志</li>
+            </ul>
+            <div class="api-plan-actions">
+              <button @click="goToExperience" class="btn btn-primary">
+                前往体验中心
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -146,11 +168,13 @@
 
 <script setup>
 import { computed, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { updateUserQuota, normalizeQuotaInfo } from '@/api/register'
 import { redeemCode } from '@/api/admin' // 假设redeemCode函数在admin.js中
 
 const userStore = useUserStore()
+const router = useRouter()
 const isSupportDropdownVisible = ref(false)
 const loadingQuota = ref(false)
 
@@ -207,6 +231,10 @@ const goToClaudeMirror = () => {
   } else {
     alert('用户未登录或缺少访问令牌');
   }
+}
+
+const goToExperience = () => {
+  router.push('/experience')
 }
 
 // 获取用户额度信息
@@ -452,8 +480,27 @@ onMounted(() => {
 
 .subscription-actions {
   display: flex;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 24px;
+}
+
+.subscription-actions .btn {
+  flex: 1 1 140px;
+  min-width: 0;
+  padding: 0.85rem 1.2rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .subscription-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .subscription-actions .btn {
+    width: 100%;
+    flex: none;
+  }
 }
 
 .redemption-section {
@@ -685,6 +732,114 @@ onMounted(() => {
 .plans-empty-icon {
   font-size: 2.2rem;
   opacity: 0.6;
+}
+
+/* API 套餐卡片 */
+.api-plan-card {
+  grid-column: span 1;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+    linear-gradient(135deg, #38bdf8, #a855f7, #ec4899) border-box;
+}
+
+.api-plan-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.18), transparent 55%);
+  pointer-events: none;
+}
+
+.api-plan-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.api-plan-card .card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #38bdf8, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.api-plan-card .card-title::after {
+  content: 'NEW';
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #38bdf8, #a855f7);
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+}
+
+.api-plan-desc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.api-plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.api-plan-features li {
+  position: relative;
+  padding-left: 24px;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.api-plan-features li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #a855f7;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.api-plan-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.api-plan-actions .btn-primary {
+  background: linear-gradient(135deg, #38bdf8, #a855f7);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.35);
+}
+
+.api-plan-actions .btn-primary:hover {
+  background: linear-gradient(135deg, #0ea5e9, #9333ea);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(168, 85, 247, 0.5);
+}
+
+@media (max-width: 480px) {
+  .api-plan-actions {
+    justify-content: stretch;
+  }
+  .api-plan-actions .btn {
+    width: 100%;
+  }
 }
 
 /* 兑换码卡片样式 */
