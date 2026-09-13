@@ -173,7 +173,7 @@ function updatePlanModels(data) {
 
 onMounted(() => {
   fetchTaobaoUrl()
-  fetchAvailableModels()
+  // fetchAvailableModels()
 })
 </script>
 

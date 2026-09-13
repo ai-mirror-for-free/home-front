@@ -186,7 +186,7 @@ async function fetchModelCount() {
 }
 
 onMounted(() => {
-  fetchModelCount()
+  // fetchModelCount()
 })
 
 </script>

@@ -136,6 +136,35 @@
               <span class="plans-empty-icon">💳</span>
               <p>暂无套餐额度数据</p>
             </div>
+
+            <!-- 邀请返利区域 -->
+            <div class="invite-section">
+              <div class="invite-summary">
+                <div class="invite-summary-label">累计返利</div>
+                <div class="invite-summary-value">
+                  <span class="currency">¥</span>
+                  <span class="amount">{{ Number(inviteTotalRmb).toFixed(2) }}</span>
+                </div>
+                <div class="invite-summary-hint" v-if="inviteLoading">加载中…</div>
+                <div class="invite-summary-hint" v-else-if="inviteLoadError">数据暂不可用</div>
+                <div class="invite-summary-hint" v-else>好友兑换激活码后自动到账</div>
+              </div>
+              <div class="invite-actions">
+                <button
+                  type="button"
+                  class="btn btn-outline"
+                  :disabled="!affCode"
+                  @click="copyInviteLink"
+                  :title="inviteCopied ? '已复制' : '复制邀请链接'"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span>{{ inviteCopied ? '已复制' : '复制邀请链接' }}</span>
+                </button>
+                <button type="button" class="btn btn-primary" @click="goToInvite">
+                  查看详情
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -171,6 +200,7 @@ import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { updateUserQuota, normalizeQuotaInfo } from '@/api/register'
+import { getInviteInfo } from '@/api/invite'
 import { redeemCode } from '@/api/admin' // 假设redeemCode函数在admin.js中
 
 const userStore = useUserStore()
@@ -183,6 +213,14 @@ const redemptionCode = ref('')
 const redemptionLoading = ref(false)
 const redemptionMessage = ref('')
 const redemptionMessageType = ref('') // 'success' or 'error'
+
+// 邀请返利相关变量
+const inviteLoading = ref(false)
+const inviteLoadError = ref(false)
+const affCode = ref('')
+const inviteTotalRmb = ref(0)
+const inviteCopied = ref(false)
+let inviteCopyTimer = null
 
 // 使用计算属性来响应式地获取用户信息
 const userInfo = computed(() => userStore.state.userInfo)
@@ -312,8 +350,67 @@ const handleRedeemCode = async () => {
 onMounted(() => {
   if (userStore.state.isLoggedIn) {
     fetchUserQuota()
+    fetchInviteSummary()
   }
 })
+
+// 拉取邀请返利汇总（用于个人中心卡片展示）
+async function fetchInviteSummary() {
+  const email = userStore.getUserEmail()
+  if (!email) return
+  inviteLoading.value = true
+  inviteLoadError.value = false
+  try {
+    const resp = await getInviteInfo(email)
+    const data = resp && resp.data ? resp.data : {}
+    affCode.value = data.aff_code || ''
+    inviteTotalRmb.value = Number(data.total_reward_rmb || 0)
+  } catch (e) {
+    inviteLoadError.value = true
+    console.warn('获取邀请信息失败:', e.message)
+  } finally {
+    inviteLoading.value = false
+  }
+}
+
+function buildInviteLink() {
+  if (!affCode.value) return ''
+  return `${window.location.origin}/register?aff=${encodeURIComponent(affCode.value)}`
+}
+
+function copyInviteLink() {
+  const link = buildInviteLink()
+  if (!link) return
+  const onCopied = () => {
+    inviteCopied.value = true
+    clearTimeout(inviteCopyTimer)
+    inviteCopyTimer = setTimeout(() => { inviteCopied.value = false }, 1500)
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link).then(onCopied).catch(() => fallbackCopyLink(link, onCopied))
+  } else {
+    fallbackCopyLink(link, onCopied)
+  }
+}
+
+function fallbackCopyLink(text, cb) {
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.style.position = 'fixed'
+  ta.style.opacity = '0'
+  document.body.appendChild(ta)
+  ta.select()
+  try {
+    document.execCommand('copy')
+    cb && cb()
+  } finally {
+    document.body.removeChild(ta)
+  }
+}
+
+function goToInvite() {
+  router.push('/invite')
+}
 </script>
 
 <style scoped>
@@ -732,6 +829,83 @@ onMounted(() => {
 .plans-empty-icon {
   font-size: 2.2rem;
   opacity: 0.6;
+}
+
+/* 邀请返利区域（额度卡片底部） */
+.invite-section {
+  margin-top: auto;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card-hover);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.invite-summary-label {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+.invite-summary-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--text-primary);
+}
+
+.invite-summary-value .currency {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.invite-summary-value .amount {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #38bdf8, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.01em;
+}
+
+.invite-summary-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.invite-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.invite-actions .btn {
+  flex: 1 1 0;
+  min-width: 120px;
+  padding: 9px 14px;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.invite-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 380px) {
+  .invite-actions .btn {
+    flex-basis: 100%;
+  }
 }
 
 /* API 套餐卡片 */
