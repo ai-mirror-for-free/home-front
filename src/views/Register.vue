@@ -56,8 +56,9 @@
           <form @submit.prevent="handleRegister" class="auth-form">
             <!-- <div class="form-row"> -->
               <div class="form-group">
-                <label>姓名</label>
-                <input v-model="form.name" type="text" class="input-field" placeholder="你的名字" required />
+                <label>姓名 <span style="color:#B85050;font-weight:400;">（用户名）</span></label>
+                <input v-model="form.name" type="text" class="input-field" placeholder="你的名字（将作为用户名）" required />
+                <span class="form-hint">⚠️ 请牢记此用户名，作为找回密码的重要凭证</span>
               </div>
               <!-- <div class="form-group">
                 <label>手机号（可选）</label>
@@ -125,7 +126,7 @@
             <!-- Invite Code -->
             <div class="form-group">
               <label>邀请码（可选）</label>
-              <input v-model="form.invite" type="text" class="input-field" placeholder="输入邀请码享额外奖励" />
+              <input v-model="form.invite" type="text" class="input-field" placeholder="输入邀请码" />
             </div>
 
             <label class="checkbox-wrap">

@@ -5,9 +5,17 @@
 
     <div class="container">
       <div class="page-header">
-        <span class="tag tag-cyan">体验中心</span>
-        <h1 class="page-title">模型体验中心</h1>
-        <p class="page-desc">输入 API Key 即可查询余额并体验模型单轮对话，支持图片输出。Key 仅保存在本地，过期自动清除。</p>
+        <span class="tag tag-cyan">API 体验</span>
+        <h1 class="page-title">API 体验中心</h1>
+        <p class="page-desc">仅供 API 用户测试 API 调用效果，请输入你的 API Key 查询余额并体验模型单轮对话，支持图片输出。Key 仅保存在本地，过期自动清除。</p>
+        <div class="api-notice">
+          <span class="api-notice-icon">i</span>
+          <div class="api-notice-text">
+              <strong>这是 API 调试工具，不是聊天网站。</strong>
+              此页面仅用于验证 API Key（非激活码）、测试模型输出与图片生成效果，不提供对话记录、多轮上下文、文件上传等聊天产品功能。
+              如需访问 claude，请登录前往<router-link to="/profile" class="api-notice-link">个人中心</router-link>。
+            </div>
+        </div>
       </div>
 
       <div class="layout">
@@ -87,8 +95,9 @@
 
           <div class="chat-window" ref="chatWindowRef">
             <div v-if="messages.length === 0" class="chat-empty">
-              <div class="empty-icon">💬</div>
-              <p>开始你的第一句对话吧</p>
+              <div class="empty-icon">⚙️</div>
+              <p>输入提示词测试 API 调用效果</p>
+              <p class="chat-empty-sub">单轮请求 · 无对话记忆 · 无聊天记录持久化</p>
             </div>
             <div v-for="(msg, idx) in messages" :key="idx" class="msg" :class="msg.role">
               <div class="msg-avatar">{{ msg.role === 'user' ? '我' : 'AI' }}</div>
@@ -355,6 +364,44 @@ onMounted(() => {
 }
 .page-desc { color: var(--color-text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto; line-height: 1.8; }
 
+.api-notice {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 640px;
+  margin: 20px auto 0;
+  padding: 14px 18px;
+  background: rgba(184,154,75,0.08);
+  border: 1px solid rgba(184,154,75,0.3);
+  border-radius: var(--radius-md);
+  text-align: left;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+.api-notice-icon {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: #B89A4B;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  font-family: var(--font-display);
+}
+.api-notice-text strong { color: #8A6A1F; font-weight: 700; }
+.api-notice-link {
+  color: #8A6A1F;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: var(--transition);
+}
+.api-notice-link:hover { color: var(--color-accent); }
+
 .layout {
   display: grid;
   grid-template-columns: 380px 1fr;
@@ -518,6 +565,7 @@ onMounted(() => {
   text-align: center;
   color: var(--text-muted);
 }
+.chat-empty-sub { font-size: 12px; color: var(--color-text-muted); margin-top: 6px; opacity: 0.75; }
 .empty-icon { font-size: 36px; margin-bottom: 8px; }
 .msg { display: flex; gap: 10px; align-items: flex-start; }
 .msg.user { flex-direction: row-reverse; }
