@@ -17,6 +17,7 @@
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { isTokenExpiringSoon, refreshTokenSilently, setupTokenAutoRefresh } from '@/utils/tokenRefresh'
 import AppNav from './components/AppNav.vue'
 import AppFooter from './components/AppFooter.vue'
 import FloatingIcons from './components/FloatingIcons.vue'
@@ -33,6 +34,26 @@ const isAdminRoute = computed(() => {
 
 // 进入本站或刷新时，校验本地 token 是否仍有效
 onMounted(async () => {
+  // token 快过期（<5min）先静默续期，避免下面的 /me 校验因过期 401 而误登出。
+  // 续期失败静默：可能旧 token 仍有效，由 /me 兜底；RT 失效由 /me 401 兜底。
+  if (userStore.getToken() && isTokenExpiringSoon(userStore.getToken())) {
+    const newToken = await refreshTokenSilently()
+    if (newToken) {
+      try {
+        const exp = JSON.parse(atob(newToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).exp
+        userStore.updateToken(newToken, typeof exp === 'number' ? new Date(exp * 1000).toISOString() : null)
+      } catch (_) {
+        userStore.updateToken(newToken, null)
+      }
+    }
+  }
+  // 安装自动续期：60s 定时 + 页面切回前台时，token 快过期则静默换新。
+  // 治用户静置后 token 过期被踢出重新输密码（kaysar0801@163.com，2026-10-15）。
+  setupTokenAutoRefresh(
+    () => userStore.getToken(),
+    (t, expiresAt) => userStore.updateToken(t, expiresAt)
+  )
+
   const token = userStore.getToken()
   if (!token) return
 

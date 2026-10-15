@@ -182,6 +182,17 @@ export function useUserStore() {
     Object.assign(state.quotaInfo, quotaData);
   };
 
+  // 静默续期专用：只替换 token 与过期时间，不动用户信息。
+  // state.authInfo 是代理对象，赋值后自动触发 saveState 落盘。
+  const updateToken = (token, expiresAt) => {
+    if (!token) return;
+    localStorage.setItem('token', token);
+    Object.assign(state.authInfo, {
+      token: token,
+      expires_at: expiresAt || state.authInfo.expires_at
+    });
+  };
+
   // 添加一个方法用于获取token
   const getToken = () => {
     return state.authInfo.token;
@@ -203,6 +214,7 @@ export function useUserStore() {
     logout,
     updateSubscription,
     updateQuotaInfo,
+    updateToken,
     getToken,
     getUserEmail,
     getUserName

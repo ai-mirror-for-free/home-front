@@ -264,7 +264,15 @@ const goToClaudeMirror = () => {
     const currentHostname = window.location.hostname;
     const parts = currentHostname.split('.');
     const mainDomain = parts.slice(-2).join('.');
-    const targetUrl = `https://claude.${mainDomain}/?token=${encodeURIComponent(token)}`;
+    // 同时带上 refresh_token / session_id：Chat 域（claude.xxx）跨域拿不到本域
+    // localStorage，先前只传 token，Chat 页 access token（30min）过期后无处续期，
+    // 被迫弹回登录页重输密码（kaysar0801@163.com，2026-10-15）。
+    // Chat 页 TokenUrlInterceptor 原生支持这两个参数，会写入它的本地存储。
+    const refreshToken = localStorage.getItem('refresh_token') || ''
+    const sessionId = localStorage.getItem('currentSessionId') || ''
+    let targetUrl = `https://claude.${mainDomain}/?token=${encodeURIComponent(token)}`;
+    if (refreshToken) targetUrl += `&refresh_token=${encodeURIComponent(refreshToken)}`;
+    if (sessionId) targetUrl += `&session_id=${encodeURIComponent(sessionId)}`;
     window.open(targetUrl, '_blank');
   } else {
     alert('用户未登录或缺少访问令牌');
