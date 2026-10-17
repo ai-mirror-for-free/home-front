@@ -57,8 +57,8 @@
           <h2>解锁全部模型</h2>
           <p>前往淘宝或闲鱼购买订阅套餐，获取更多模型访问权限</p>
           <div class="cta-buttons">
-            <a href="https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo" target="_blank" class="btn btn-primary">前往淘宝订阅</a>
-            <a href="https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz" target="_blank" class="btn btn-outline">前往闲鱼订阅</a>
+            <a :href="taobaoUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary">前往淘宝订阅</a>
+            <a :href="xianyuUrl" target="_blank" rel="noopener noreferrer" class="btn btn-outline">前往闲鱼订阅</a>
           </div>
         </div>
       </div>
@@ -68,6 +68,25 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import {
+  getPurchaseLinks,
+  DEFAULT_TAOBAO_URL,
+  DEFAULT_XIANYU_URL
+} from '@/api/siteLinks'
+
+// 购买链接优先取后台「配置管理」，未配置时用常量兜底
+const taobaoUrl = ref(DEFAULT_TAOBAO_URL)
+const xianyuUrl = ref(DEFAULT_XIANYU_URL)
+
+onMounted(async () => {
+  try {
+    const links = await getPurchaseLinks()
+    taobaoUrl.value = links.taobaoUrl
+    xianyuUrl.value = links.xianyuUrl
+  } catch (e) {
+    console.warn('获取购买链接失败，使用默认链接:', e.message)
+  }
+})
 
 const modelSeries = [
   { id: 'gemini', label: 'Gemini', icon: '/icon/gemini-color.svg' },

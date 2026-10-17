@@ -183,8 +183,26 @@
 </template>
 
 <script setup>
-const taobaoUrl = 'https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo'
-const xianyuUrl = 'https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz'
+import { ref, onMounted } from 'vue'
+import {
+  getPurchaseLinks,
+  DEFAULT_TAOBAO_URL,
+  DEFAULT_XIANYU_URL
+} from '@/api/siteLinks'
+
+// 后台「配置管理」可覆盖，接口未配置时用常量兜底
+const taobaoUrl = ref(DEFAULT_TAOBAO_URL)
+const xianyuUrl = ref(DEFAULT_XIANYU_URL)
+
+onMounted(async () => {
+  try {
+    const links = await getPurchaseLinks()
+    taobaoUrl.value = links.taobaoUrl
+    xianyuUrl.value = links.xianyuUrl
+  } catch (e) {
+    console.warn('获取购买链接失败，使用默认链接:', e.message)
+  }
+})
 </script>
 
 <style scoped>

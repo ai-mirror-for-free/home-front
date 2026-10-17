@@ -28,10 +28,10 @@
         </div>
       </Transition>
     </div>
-    <a href="https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo" target="_blank" class="floating-icon" title="淘宝店铺">
+    <a :href="taobaoUrl" target="_blank" rel="noopener noreferrer" class="floating-icon" title="淘宝店铺">
       <img src="/icon/taobao.svg" alt="淘宝" />
     </a>
-    <a href="https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz" target="_blank" class="floating-icon floating-icon-text" title="闲鱼店铺">
+    <a :href="xianyuUrl" target="_blank" rel="noopener noreferrer" class="floating-icon floating-icon-text" title="闲鱼店铺">
       <span class="floating-icon-emoji">🐟</span>
     </a>
   </div>
@@ -39,9 +39,18 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
+import {
+  getPurchaseLinks,
+  DEFAULT_TAOBAO_URL,
+  DEFAULT_XIANYU_URL
+} from '@/api/siteLinks'
 
 const showQQPopup = ref(false)
 const copied = ref(false)
+
+// 购买链接优先取后台「配置管理」，未配置时用常量兜底
+const taobaoUrl = ref(DEFAULT_TAOBAO_URL)
+const xianyuUrl = ref(DEFAULT_XIANYU_URL)
 
 function toggleQQPopup() {
   showQQPopup.value = !showQQPopup.value
@@ -62,8 +71,15 @@ function handleClickOutside(event) {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('click', handleClickOutside)
+  try {
+    const links = await getPurchaseLinks()
+    taobaoUrl.value = links.taobaoUrl
+    xianyuUrl.value = links.xianyuUrl
+  } catch (e) {
+    console.warn('获取购买链接失败，使用默认链接:', e.message)
+  }
 })
 
 onUnmounted(() => {

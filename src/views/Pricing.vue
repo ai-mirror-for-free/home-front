@@ -66,9 +66,14 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import {
+  getPurchaseLinks,
+  DEFAULT_TAOBAO_URL as defaultTaobaoUrlConstant,
+  DEFAULT_XIANYU_URL as defaultXianyuUrlConstant
+} from '@/api/siteLinks'
 
-const defaultTaobaoUrl = 'https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo'
-const defaultXianyuUrl = 'https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz'
+const defaultTaobaoUrl = defaultTaobaoUrlConstant
+const defaultXianyuUrl = defaultXianyuUrlConstant
 
 const packageTypes = [
   { id: 'mirror', name: 'Claude 镜像套餐', icon: '🪞', desc: 'Web 端直接使用,适合个人与团队' },
@@ -125,20 +130,13 @@ function formatModelName(model) {
 
 async function fetchTaobaoUrl() {
   try {
-    const response = await fetch('/api/text/tbUrl')
-    if (response.ok) {
-      const data = await response.json()
-      if (data && data.url) {
-        mirrorPlan.value.taobaoUrl = data.url
-        apiPlan.value.taobaoUrl = data.url
-      }
-      if (data && data.xianyu_url) {
-        mirrorPlan.value.xianyuUrl = data.xianyu_url
-        apiPlan.value.xianyuUrl = data.xianyu_url
-      }
-    }
+    const links = await getPurchaseLinks()
+    mirrorPlan.value.taobaoUrl = links.taobaoUrl
+    apiPlan.value.taobaoUrl = links.taobaoUrl
+    mirrorPlan.value.xianyuUrl = links.xianyuUrl
+    apiPlan.value.xianyuUrl = links.xianyuUrl
   } catch (error) {
-    console.log('获取淘宝链接失败，使用默认链接')
+    console.log('获取购买链接失败，使用默认链接')
   }
 }
 
