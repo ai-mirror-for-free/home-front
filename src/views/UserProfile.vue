@@ -31,14 +31,6 @@
             
             <div class="subscription-actions">
               <a
-                :href="purchaseLinks.fakaUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="btn btn-primary"
-              >
-                点击购买
-              </a>
-              <a
                 :href="purchaseLinks.taobaoUrl"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -47,12 +39,12 @@
                 前往淘宝
               </a>
               <a
-                :href="purchaseLinks.xianyuUrl"
+                :href="purchaseLinks.fakaUrl"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="btn btn-outline"
               >
-                前往闲鱼
+                点击购买
               </a>
               <button @click="goToClaudeMirror" class="btn btn-primary">
                 开始聊天
@@ -219,11 +211,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { updateUserQuota, normalizeQuotaInfo } from '@/api/register'
 import { getInviteInfo } from '@/api/invite'
-import {
-  getPurchaseLinks,
-  DEFAULT_TAOBAO_URL,
-  DEFAULT_XIANYU_URL
-} from '@/api/siteLinks'
+import { getPurchaseLinks, DEFAULT_TAOBAO_URL } from '@/api/siteLinks'
 import { redeemCode } from '@/api/admin' // 假设redeemCode函数在admin.js中
 
 const userStore = useUserStore()
@@ -237,20 +225,18 @@ const redemptionLoading = ref(false)
 const redemptionMessage = ref('')
 const redemptionMessageType = ref('') // 'success' or 'error'
 
-// 购买跳转链接（来自后台「配置管理」：发卡网址 / 淘宝链接 / 闲鱼链接）
+// 购买跳转链接（来自后台「配置管理」：淘宝链接 / 发卡网址）
 // 先用硬编码兜底，接口返回后再覆盖，避免首屏出现空 href
 const purchaseLinks = reactive({
-  fakaUrl: DEFAULT_TAOBAO_URL,
   taobaoUrl: DEFAULT_TAOBAO_URL,
-  xianyuUrl: DEFAULT_XIANYU_URL
+  fakaUrl: DEFAULT_TAOBAO_URL
 })
 
 async function fetchPurchaseLinks() {
   try {
     const links = await getPurchaseLinks()
-    purchaseLinks.fakaUrl = links.fakaUrl
     purchaseLinks.taobaoUrl = links.taobaoUrl
-    purchaseLinks.xianyuUrl = links.xianyuUrl
+    purchaseLinks.fakaUrl = links.fakaUrl
   } catch (e) {
     console.warn('获取购买链接失败，使用默认链接:', e.message)
   }
