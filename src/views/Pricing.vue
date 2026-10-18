@@ -37,10 +37,13 @@
             </div>
           </div>
 
-          <a :href="currentPlan.taobaoUrl" target="_blank" class="plan-btn btn btn-primary">
+          <a :href="fakaUrl" target="_blank" rel="noopener noreferrer" class="plan-btn btn btn-primary">
+            前往查看套餐价格
+          </a>
+          <a :href="currentPlan.taobaoUrl" target="_blank" rel="noopener noreferrer" class="plan-btn btn btn-outline">
             前往淘宝查看价格
           </a>
-          <a :href="currentPlan.xianyuUrl" target="_blank" class="plan-btn btn btn-outline">
+          <a :href="currentPlan.xianyuUrl" target="_blank" rel="noopener noreferrer" class="plan-btn btn btn-outline">
             前往闲鱼查看价格
           </a>
 
@@ -74,6 +77,10 @@ import {
 
 const defaultTaobaoUrl = defaultTaobaoUrlConstant
 const defaultXianyuUrl = defaultXianyuUrlConstant
+
+// 「前往查看套餐价格」跳转的发卡网址（后台配置管理 → 发卡网址），两个套餐通用
+// 未配置时 getPurchaseLinks 已回退到淘宝链接，这里初值也先给淘宝链接避免空 href
+const fakaUrl = ref(defaultTaobaoUrl)
 
 const packageTypes = [
   { id: 'mirror', name: 'Claude 镜像套餐', icon: '🪞', desc: 'Web 端直接使用,适合个人与团队' },
@@ -131,6 +138,7 @@ function formatModelName(model) {
 async function fetchTaobaoUrl() {
   try {
     const links = await getPurchaseLinks()
+    fakaUrl.value = links.fakaUrl
     mirrorPlan.value.taobaoUrl = links.taobaoUrl
     apiPlan.value.taobaoUrl = links.taobaoUrl
     mirrorPlan.value.xianyuUrl = links.xianyuUrl
@@ -298,11 +306,14 @@ onMounted(() => {
   width: 100%;
   justify-content: center;
   margin-top: 8px;
-  margin-bottom: 28px;
+  margin-bottom: 12px;
   text-decoration: none;
   padding: 16px;
   font-size: 1rem;
 }
+
+/* 三个购买按钮堆叠，最后一个与下方分隔线留出主间距 */
+.plan-btn:last-of-type { margin-bottom: 28px; }
 
 .plan-divider { height: 1px; background: var(--color-border-light); margin-bottom: 24px; }
 .plan-features { list-style: none; display: flex; flex-direction: column; gap: 14px; }
