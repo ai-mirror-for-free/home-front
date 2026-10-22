@@ -43,8 +43,8 @@
           <a :href="currentPlan.taobaoUrl" target="_blank" rel="noopener noreferrer" class="plan-btn btn btn-outline">
             前往淘宝查看价格
           </a>
-          <a :href="currentPlan.xianyuUrl" target="_blank" rel="noopener noreferrer" class="plan-btn btn btn-outline">
-            前往闲鱼查看价格
+          <a :href="fakaUrl" target="_blank" rel="noopener noreferrer" class="plan-btn btn btn-outline">
+            点击购买
           </a>
 
           <div class="plan-divider"></div>
@@ -71,12 +71,10 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   getPurchaseLinks,
-  DEFAULT_TAOBAO_URL as defaultTaobaoUrlConstant,
-  DEFAULT_XIANYU_URL as defaultXianyuUrlConstant
+  DEFAULT_TAOBAO_URL as defaultTaobaoUrlConstant
 } from '@/api/siteLinks'
 
 const defaultTaobaoUrl = defaultTaobaoUrlConstant
-const defaultXianyuUrl = defaultXianyuUrlConstant
 
 // 「前往查看套餐价格」跳转的发卡网址（后台配置管理 → 发卡网址），两个套餐通用
 // 未配置时 getPurchaseLinks 已回退到淘宝链接，这里初值也先给淘宝链接避免空 href
@@ -95,7 +93,6 @@ const mirrorPlan = ref({
   icon: '⚡',
   iconBg: 'rgba(56,189,248,0.15)',
   taobaoUrl: defaultTaobaoUrl,
-  xianyuUrl: defaultXianyuUrl,
   features: [
     { text: '按 Token 使用量计费', included: true },
     { text: 'Claude 全系模型访问 (Opus / Sonnet / Haiku)', included: true },
@@ -114,7 +111,6 @@ const apiPlan = ref({
   icon: '⚡',
   iconBg: 'rgba(167,139,250,0.15)',
   taobaoUrl: defaultTaobaoUrl,
-  xianyuUrl: defaultXianyuUrl,
   features: [
     { text: '按 Token 使用量计费', included: true },
     { text: 'Claude / Gemini / OpenAI 全系模型', included: true },
@@ -141,8 +137,6 @@ async function fetchTaobaoUrl() {
     fakaUrl.value = links.fakaUrl
     mirrorPlan.value.taobaoUrl = links.taobaoUrl
     apiPlan.value.taobaoUrl = links.taobaoUrl
-    mirrorPlan.value.xianyuUrl = links.xianyuUrl
-    apiPlan.value.xianyuUrl = links.xianyuUrl
   } catch (error) {
     console.log('获取购买链接失败，使用默认链接')
   }
@@ -312,7 +306,7 @@ onMounted(() => {
   font-size: 1rem;
 }
 
-/* 三个购买按钮堆叠，最后一个与下方分隔线留出主间距 */
+/* 三个购买按钮堆叠（前往查看套餐价格 / 前往淘宝查看价格 / 点击购买），最后一个与下方分隔线留出主间距 */
 .plan-btn:last-of-type { margin-bottom: 28px; }
 
 .plan-divider { height: 1px; background: var(--color-border-light); margin-bottom: 24px; }
