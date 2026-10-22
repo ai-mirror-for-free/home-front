@@ -2,7 +2,6 @@ const API_BASE = '/api'
 
 // 兜底链接：后台未配置时使用，保证页面不会出现空 href
 export const DEFAULT_TAOBAO_URL = 'https://e.tb.cn/h.8UyAjmuZLZEnWiZ?tk=gkWigxdsfMo'
-export const DEFAULT_XIANYU_URL = 'https://m.tb.cn/h.8UBxavO?tk=BrifgxWK8rz'
 
 /**
  * 把后台存的 content 解析成链接。
@@ -43,7 +42,7 @@ function isSafeUrl(url) {
 
 /**
  * 读取后台「配置管理」里的单个链接。
- * @param {string} key      后台配置 key，如 fakaUrl / tbUrl / xianyuUrl
+ * @param {string} key      后台配置 key，如 fakaUrl / tbUrl
  * @param {string} fallback 取不到时的兜底链接
  */
 export async function getSiteLink(key, fallback = '') {
@@ -62,25 +61,22 @@ export async function getSiteLink(key, fallback = '') {
 }
 
 /**
- * 一次性取齐购买相关三个链接。
- * fakaUrl（发卡网址）未配置时回退到淘宝链接，保证「点击购买」始终可点。
+ * 一次性取齐购买相关两个链接。
+ * fakaUrl（发卡网址，即「点击购买」）未配置时回退到淘宝链接，保证「点击购买」始终可点。
  */
 export async function getPurchaseLinks() {
-  const [faka, taobao, xianyu] = await Promise.all([
+  const [faka, taobao] = await Promise.all([
     getSiteLink('fakaUrl', ''),
-    getSiteLink('tbUrl', DEFAULT_TAOBAO_URL),
-    getSiteLink('xianyuUrl', DEFAULT_XIANYU_URL)
+    getSiteLink('tbUrl', DEFAULT_TAOBAO_URL)
   ])
   return {
     fakaUrl: faka || taobao,
-    taobaoUrl: taobao,
-    xianyuUrl: xianyu
+    taobaoUrl: taobao
   }
 }
 
 export default {
   getSiteLink,
   getPurchaseLinks,
-  DEFAULT_TAOBAO_URL,
-  DEFAULT_XIANYU_URL
+  DEFAULT_TAOBAO_URL
 }

@@ -126,7 +126,7 @@
         <div class="service-cta">
           <RouterLink to="/pricing" class="btn btn-primary btn-lg">查看 API 套餐</RouterLink>
           <a :href="taobaoUrl" target="_blank" class="btn btn-outline btn-lg">前往淘宝购买</a>
-          <a :href="xianyuUrl" target="_blank" class="btn btn-outline btn-lg">前往闲鱼购买</a>
+          <a :href="fakaUrl" target="_blank" class="btn btn-outline btn-lg">点击购买</a>
         </div>
       </section>
 
@@ -186,19 +186,18 @@
 import { ref, onMounted } from 'vue'
 import {
   getPurchaseLinks,
-  DEFAULT_TAOBAO_URL,
-  DEFAULT_XIANYU_URL
+  DEFAULT_TAOBAO_URL
 } from '@/api/siteLinks'
 
 // 后台「配置管理」可覆盖，接口未配置时用常量兜底
 const taobaoUrl = ref(DEFAULT_TAOBAO_URL)
-const xianyuUrl = ref(DEFAULT_XIANYU_URL)
+const fakaUrl = ref(DEFAULT_TAOBAO_URL)
 
 onMounted(async () => {
   try {
     const links = await getPurchaseLinks()
     taobaoUrl.value = links.taobaoUrl
-    xianyuUrl.value = links.xianyuUrl
+    fakaUrl.value = links.fakaUrl
   } catch (e) {
     console.warn('获取购买链接失败，使用默认链接:', e.message)
   }

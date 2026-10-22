@@ -31,8 +31,8 @@
     <a :href="taobaoUrl" target="_blank" rel="noopener noreferrer" class="floating-icon" title="淘宝店铺">
       <img src="/icon/taobao.svg" alt="淘宝" />
     </a>
-    <a :href="xianyuUrl" target="_blank" rel="noopener noreferrer" class="floating-icon floating-icon-text" title="闲鱼店铺">
-      <span class="floating-icon-emoji">🐟</span>
+    <a :href="fakaUrl" target="_blank" rel="noopener noreferrer" class="floating-icon floating-icon-text" title="点击购买">
+      <span class="floating-icon-emoji">🛒</span>
     </a>
   </div>
 </template>
@@ -41,8 +41,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import {
   getPurchaseLinks,
-  DEFAULT_TAOBAO_URL,
-  DEFAULT_XIANYU_URL
+  DEFAULT_TAOBAO_URL
 } from '@/api/siteLinks'
 
 const showQQPopup = ref(false)
@@ -50,7 +49,7 @@ const copied = ref(false)
 
 // 购买链接优先取后台「配置管理」，未配置时用常量兜底
 const taobaoUrl = ref(DEFAULT_TAOBAO_URL)
-const xianyuUrl = ref(DEFAULT_XIANYU_URL)
+const fakaUrl = ref(DEFAULT_TAOBAO_URL)
 
 function toggleQQPopup() {
   showQQPopup.value = !showQQPopup.value
@@ -76,7 +75,7 @@ onMounted(async () => {
   try {
     const links = await getPurchaseLinks()
     taobaoUrl.value = links.taobaoUrl
-    xianyuUrl.value = links.xianyuUrl
+    fakaUrl.value = links.fakaUrl
   } catch (e) {
     console.warn('获取购买链接失败，使用默认链接:', e.message)
   }

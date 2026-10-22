@@ -55,10 +55,10 @@
       <div class="subscribe-cta">
         <div class="cta-content">
           <h2>解锁全部模型</h2>
-          <p>前往淘宝或闲鱼购买订阅套餐，获取更多模型访问权限</p>
+          <p>前往淘宝或点击购买订阅套餐，获取更多模型访问权限</p>
           <div class="cta-buttons">
             <a :href="taobaoUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary">前往淘宝订阅</a>
-            <a :href="xianyuUrl" target="_blank" rel="noopener noreferrer" class="btn btn-outline">前往闲鱼订阅</a>
+            <a :href="fakaUrl" target="_blank" rel="noopener noreferrer" class="btn btn-outline">点击购买</a>
           </div>
         </div>
       </div>
@@ -70,19 +70,18 @@
 import { ref, computed, onMounted } from 'vue'
 import {
   getPurchaseLinks,
-  DEFAULT_TAOBAO_URL,
-  DEFAULT_XIANYU_URL
+  DEFAULT_TAOBAO_URL
 } from '@/api/siteLinks'
 
 // 购买链接优先取后台「配置管理」，未配置时用常量兜底
 const taobaoUrl = ref(DEFAULT_TAOBAO_URL)
-const xianyuUrl = ref(DEFAULT_XIANYU_URL)
+const fakaUrl = ref(DEFAULT_TAOBAO_URL)
 
 onMounted(async () => {
   try {
     const links = await getPurchaseLinks()
     taobaoUrl.value = links.taobaoUrl
-    xianyuUrl.value = links.xianyuUrl
+    fakaUrl.value = links.fakaUrl
   } catch (e) {
     console.warn('获取购买链接失败，使用默认链接:', e.message)
   }
