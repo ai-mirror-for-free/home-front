@@ -57,8 +57,8 @@
           <div class="card-body">
             <ul class="rule-list">
               <li>好友注册时填写您的邀请码，建立邀请关系（仅新用户可绑定，不可补填）。</li>
-              <li>好友每次兑换 <strong>Claude Code</strong> 激活码，您将获得充值面额 <strong>10%</strong> 的返利，<strong>无封顶</strong>。</li>
-              <li>返利自动累加到您的 Claude Code 余额，可在「个人中心」查看。</li>
+              <li>好友每次兑换 <strong>Claude</strong> 激活码，您将获得充值面额 <strong>10%</strong> 的返利，<strong>无封顶</strong>。</li>
+              <li>返利自动累加到您的 Claude 余额，可在「个人中心」查看。</li>
               <li>同一激活码仅触发一次返利（幂等）。</li>
             </ul>
           </div>

@@ -19,7 +19,7 @@
           </div>
           <div class="card-body">
             <div class="subscription-badge">
-              <span class="tag tag-cyan">Claude Code · 预付费按量</span>
+              <span class="tag tag-cyan">Claude · 预付费按量</span>
             </div>
 
             <div class="subscription-details">
@@ -277,7 +277,7 @@ const supportOptions = [
 // 格式化套餐类型 (来自后端 plans[].type)
 const formatPlanType = (type) => {
   const map = {
-    'claude code': 'Claude Code',
+    'claude code': 'Claude',
   }
   return map[type] || type
 }
