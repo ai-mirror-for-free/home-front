@@ -93,6 +93,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user' // 导入用户状态管理
+import { resetRefreshFailureStreak } from '@/utils/tokenRefresh' // 登录成功重置静默续期熔断计数
 
 const router = useRouter()
 const { login } = useUserStore() // 解构出login方法
@@ -158,6 +159,8 @@ async function handleLogin() {
     // 单独再存一份 refresh_token / session_id，给将来扩展用；不影响当前逻辑
     if (refreshToken) localStorage.setItem('refresh_token', refreshToken)
     if (data.session_id) localStorage.setItem('currentSessionId', data.session_id)
+    // 重新登录 = 新凭证，清掉上一次会话可能残留的 401 熔断计数
+    resetRefreshFailureStreak()
 
     // 使用用户状态管理登录（沿用原 userStore.login 签名）
     login(
