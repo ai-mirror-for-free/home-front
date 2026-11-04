@@ -6,7 +6,7 @@
       <div class="page-header">
         <span class="tag tag-cyan">套餐介绍</span>
         <h1 class="page-title">两大服务，一次了解</h1>
-        <p class="page-desc">chat-keeper 主营两大服务：可直接访问的 Claude 镜像网站，以及面向开发者的各大模型 API 接口服务。</p>
+        <p class="page-desc">chat-keeper 主营两大服务：可直接访问的 Claude 镜像网站，以及面向企业团队的各大模型 API 接口服务。</p>
       </div>
 
       <!-- Service 1: Claude 镜像 -->
@@ -53,9 +53,9 @@
         <div class="service-head">
           <div class="service-icon" style="background: rgba(56,189,248,0.15);">🔌</div>
           <div>
-            <span class="tag tag-purple">面向开发者</span>
+            <span class="tag tag-purple">面向企业 / 团队</span>
             <h2 class="service-title">API 接口服务</h2>
-            <p class="service-subtitle">提供 Claude / Gemini / OpenAI 等大模型的标准 API 接口，对接自有应用。</p>
+            <p class="service-subtitle">官方原价 Token，高并发、可批量脚本调用、可自定义后端，面向企业级应用与生产环境。</p>
           </div>
         </div>
 
@@ -92,10 +92,28 @@
           </div>
         </div>
 
+        <div class="api-capabilities">
+          <div class="api-capability card">
+            <div class="api-capability-icon">⚡</div>
+            <h4>高并发</h4>
+            <p>面向生产环境的并发承载能力，不做低并发限流，可支撑线上业务的高峰期调用。</p>
+          </div>
+          <div class="api-capability card">
+            <div class="api-capability-icon">🔁</div>
+            <h4>批量脚本调用</h4>
+            <p>可直接用于批处理脚本、数据清洗、内容流水线等自动化任务，长时间批量跑稳定不中断。</p>
+          </div>
+          <div class="api-capability card">
+            <div class="api-capability-icon">🧩</div>
+            <h4>自定义后端</h4>
+            <p>OpenAI 兼容协议，统一 BaseURL 即可接入自建服务、中转网关、工作流平台等自有后端。</p>
+          </div>
+        </div>
+
         <div class="service-grid">
           <div class="info-card card">
             <h3>计费方式</h3>
-            <p>API 套餐按<strong>各厂商官方原价</strong>计费，可前往 Anthropic / Google / OpenAI 等官网查询模型单价，我们不额外加价。</p>
+            <p>API 套餐按<strong>各厂商官方原价</strong>计费，可前往 Anthropic / Google / OpenAI 等官网查询模型单价，我们不额外加价。价格随官方原价浮动，<strong>不做低价降级渠道</strong>。</p>
           </div>
           <div class="info-card card">
             <h3>支持的厂商</h3>
@@ -116,9 +134,9 @@
           <div class="info-card card">
             <h3>适用人群</h3>
             <ul>
-              <li>独立开发者 / 创业团队</li>
-              <li>需要把 AI 接入自有产品的工程师</li>
-              <li>多模型对比、A/B 测试的研究者</li>
+              <li>企业团队 / 创业公司</li>
+              <li>有批量调用与自动化脚本需求的技术团队</li>
+              <li>需要稳定生产环境后端服务的企业客户</li>
             </ul>
           </div>
         </div>
@@ -127,6 +145,42 @@
           <RouterLink to="/pricing" class="btn btn-primary btn-lg">查看 API 套餐</RouterLink>
           <a :href="taobaoUrl" target="_blank" class="btn btn-outline btn-lg">前往淘宝购买</a>
           <a :href="fakaUrl" target="_blank" class="btn btn-outline btn-lg">点击购买</a>
+        </div>
+      </section>
+
+      <!-- API 差异化 -->
+      <section class="compare-block">
+        <div class="section-header">
+          <span class="tag tag-orange">差异化</span>
+          <h2>API 套餐：卖的是稳定与保真，不是低价</h2>
+          <p class="section-sub">市面上不少低价 Token 套餐靠压缩成本换取价格优势；我们的 API 套餐按官方原价计费，把成本花在稳定性和保真度上。</p>
+        </div>
+        <div class="compare-table card">
+          <div class="compare-row compare-head">
+            <div></div>
+            <div>低价 Token 套餐</div>
+            <div>本站 API 套餐</div>
+          </div>
+          <div class="compare-row">
+            <div class="compare-label">价格</div>
+            <div>明显低于官方原价</div>
+            <div>官方原价，明码标价不加价</div>
+          </div>
+          <div class="compare-row">
+            <div class="compare-label">Token 保真</div>
+            <div>共享号池 / 非官方渠道，可能降级、截断上下文或换模型</div>
+            <div>官方渠道 Token，不降智、不截断上下文、不偷换模型</div>
+          </div>
+          <div class="compare-row">
+            <div class="compare-label">并发能力</div>
+            <div>常见限速、排队与超时</div>
+            <div>高并发，面向生产环境</div>
+          </div>
+          <div class="compare-row">
+            <div class="compare-label">适用场景</div>
+            <div>个人尝鲜、低成本试用</div>
+            <div>企业生产、批量任务、自有后端服务</div>
+          </div>
         </div>
       </section>
 
@@ -425,6 +479,41 @@ onMounted(async () => {
   font-weight: 600;
 }
 
+/* API CAPABILITIES */
+.api-capabilities {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+.api-capability {
+  padding: 26px;
+}
+.api-capability-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: var(--color-bg-accent);
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.api-capability h4 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--color-text-primary);
+}
+.api-capability p {
+  color: var(--color-text-secondary);
+  font-size: 0.93rem;
+  line-height: 1.75;
+  margin: 0;
+}
+
 /* COMPARE TABLE */
 .compare-block {
   margin-bottom: 60px;
@@ -432,6 +521,13 @@ onMounted(async () => {
 .section-header {
   text-align: center;
   margin-bottom: 40px;
+}
+.section-header .section-sub {
+  color: var(--color-text-muted);
+  font-size: 0.98rem;
+  line-height: 1.8;
+  max-width: 680px;
+  margin: 12px auto 0;
 }
 .section-header h2 {
   font-family: var(--font-display);
@@ -486,7 +582,7 @@ onMounted(async () => {
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .service-grid, .api-subtypes { grid-template-columns: 1fr; }
+  .service-grid, .api-subtypes, .api-capabilities { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
   .service-head { flex-direction: column; align-items: flex-start; }

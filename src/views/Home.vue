@@ -69,14 +69,15 @@
           <div class="plan-preview card">
             <div class="plan-preview-head">
               <div class="plan-preview-icon" style="background: rgba(56,189,248,0.15);">🔌</div>
-              <span class="tag tag-purple">面向开发者</span>
+              <span class="tag tag-purple">面向企业 / 团队</span>
             </div>
             <h3>API 接口服务</h3>
-            <p>提供 Claude / Gemini / OpenAI 等大模型的标准 API 接口，对接自有应用与工作流。</p>
+            <p>官方原价 Token，提供 Claude / Gemini / OpenAI 等大模型的标准 API 接口，面向企业级应用与生产环境。</p>
             <ul class="plan-preview-points">
               <li><strong>Chat 接口</strong>：对话 / 文本生成 / 工具调用</li>
               <li><strong>Image 接口</strong>：图像生成与编辑 (独立计费)</li>
               <li>两类接口对应不同的 API Key，不可混用</li>
+              <li>高并发 · 批量脚本调用 · 自定义后端接入</li>
               <li>按官方原价计费，可前往各厂商官网查询</li>
             </ul>
             <RouterLink to="/plans#api" class="plan-preview-link">了解 API 服务 →</RouterLink>

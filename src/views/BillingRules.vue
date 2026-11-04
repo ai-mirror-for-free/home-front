@@ -39,7 +39,7 @@ const billingRules = [
     id: 'rule-2',
     icon: '💱',
     title: 'API 套餐按官方原价计费',
-    description: '所有的 API 套餐可使用模型按官方 API 原价计费，您可以自行前往 Claude / Gemini / OpenAI 等官网查询最新模型价格，本站不额外加价。'
+    description: '所有的 API 套餐可使用模型按官方 API 原价计费，您可以自行前往 Claude / Gemini / OpenAI 等官网查询最新模型价格，本站不额外加价。API 套餐不使用低价降级渠道，定价随官方原价浮动，我们优先保证 Token 保真与调用稳定性。'
   },
   {
     id: 'rule-3',

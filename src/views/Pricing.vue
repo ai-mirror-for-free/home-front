@@ -82,7 +82,7 @@ const fakaUrl = ref(defaultTaobaoUrl)
 
 const packageTypes = [
   { id: 'mirror', name: 'Claude 镜像套餐', icon: '🪞', desc: 'Web 端直接使用,适合个人与团队' },
-  { id: 'api', name: 'API 套餐', icon: '🔌', desc: '按量计费,对接自有应用' },
+  { id: 'api', name: 'API 套餐', icon: '🔌', desc: '企业级接口,按量计费对接自有后端' },
 ]
 const activePackageType = ref('mirror')
 
@@ -116,8 +116,12 @@ const apiPlan = ref({
     { text: 'Claude / Gemini / OpenAI 全系模型', included: true },
     { text: 'Chat 接口 + Image 接口 (Key 独立)', included: true },
     { text: '对接自有应用 / OpenWebUI等', included: true },
+    { text: '支持高并发，面向生产环境', included: true },
+    { text: '支持批量脚本与自动化调用', included: true },
+    { text: '支持自定义后端接入 (自建服务/中转网关)', included: true },
     { text: '按各厂商官方原价计费', included: true },
-    { text: '高并发 + 技术支持', included: true },
+    { text: '官方渠道 Token，不降级不换模型', included: true },
+    { text: '技术支持', included: true },
   ],
   models: [],
 })
