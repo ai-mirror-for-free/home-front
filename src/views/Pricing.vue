@@ -114,7 +114,7 @@ const apiPlan = ref({
   features: [
     { text: '按 Token 使用量计费', included: true },
     { text: 'Claude / Gemini / OpenAI 全系模型', included: true },
-    { text: 'Chat 接口 + Image 接口 (Key 独立)', included: true },
+    { text: '统一 API Key · 对话 / 工具调用 / 多模态', included: true },
     { text: '对接自有应用 / OpenWebUI等', included: true },
     { text: '支持高并发，面向生产环境', included: true },
     { text: '支持批量脚本与自动化调用', included: true },

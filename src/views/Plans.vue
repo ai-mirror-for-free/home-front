@@ -69,26 +69,8 @@
             <ul>
               <li>适用模型：Claude 全系 / Gemini 全系 / GPT 全系</li>
               <li>典型场景：聊天机器人、写作助手、代码助手、数据分析</li>
+              <li>统一 API Key：对话 / 工具调用 / 多模态共用同一份余额</li>
             </ul>
-          </div>
-          <div class="api-subtype card">
-            <div class="api-subtype-head">
-              <span class="api-subtype-icon">🎨</span>
-              <h3>Image 接口</h3>
-            </div>
-            <p>图像生成与编辑能力，独立的计费通道，适用于需要 AI 画图的应用场景。</p>
-            <ul>
-              <li>适用模型：GPT Image / Google 生图模型等</li>
-              <li>典型场景：营销图生成、商品图、设计素材</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="api-warning card">
-          <div class="api-warning-icon">⚠️</div>
-          <div>
-            <h4>两类接口独立计费</h4>
-            <p>Chat 接口与 Image 接口使用<strong>不同的 API Key</strong>，余额不可互通。请根据实际场景分别申请对应的 Key。</p>
           </div>
         </div>
 
@@ -120,7 +102,7 @@
             <ul>
               <li><strong>Claude</strong> (Anthropic) - 对话 / 推理 / 长文档</li>
               <li><strong>Gemini</strong> (Google) - 多模态 / 长上下文</li>
-              <li><strong>OpenAI</strong> - 对话 / 生图 / 工具调用</li>
+              <li><strong>OpenAI</strong> - 对话 / 工具调用 / 多模态</li>
             </ul>
           </div>
           <div class="info-card card">
@@ -224,7 +206,7 @@
           <div class="compare-row">
             <div class="compare-label">需要 API Key</div>
             <div>否</div>
-            <div>是 (Chat / Image 分开)</div>
+            <div>是</div>
           </div>
         </div>
       </section>
@@ -386,7 +368,7 @@ onMounted(async () => {
 /* API SUBTYPES */
 .api-subtypes {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 20px;
   margin-bottom: 24px;
 }
@@ -445,38 +427,6 @@ onMounted(async () => {
   font-size: 1.4rem;
   font-weight: 700;
   line-height: 1;
-}
-
-.api-warning {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 24px 28px;
-  margin-bottom: 32px;
-  background: linear-gradient(135deg, rgba(184,154,75,0.06) 0%, rgba(184,154,75,0.1) 100%);
-  border-color: rgba(184,154,75,0.25);
-}
-.api-warning-icon {
-  font-size: 1.6rem;
-  flex-shrink: 0;
-  line-height: 1;
-}
-.api-warning h4 {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 6px;
-  color: #8B6F2E;
-}
-.api-warning p {
-  color: var(--color-text-secondary);
-  font-size: 0.93rem;
-  line-height: 1.7;
-  margin: 0;
-}
-.api-warning strong {
-  color: #8B6F2E;
-  font-weight: 600;
 }
 
 /* API CAPABILITIES */

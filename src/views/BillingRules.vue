@@ -32,8 +32,8 @@ const billingRules = [
   {
     id: 'rule-1',
     icon: '🔑',
-    title: 'API Key 分类',
-    description: 'API 接口分为 Chat 接口与 Image 接口两种，两种接口之间使用不同的 API Key，且 Key 之间不通用，余额也无法互通。请根据实际场景分别申请对应的 Key。'
+    title: '统一 API Key',
+    description: 'API 套餐统一使用同一个 API Key，对话、工具调用与多模态能力共用同一 Key 与同一份余额，无需分开申请。'
   },
   {
     id: 'rule-2',
