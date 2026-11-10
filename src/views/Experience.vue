@@ -84,10 +84,12 @@
           <div class="chat-toolbar">
             <div class="model-select-wrap">
               <label class="form-label sm">模型</label>
-                <select v-model="selectedModel" class="input-field model-select" :disabled="modelsLoading">
-                <option value="">请选择模型</option>
-                <option v-for="m in modelList" :key="m.id" :value="m.id">{{ m.name || m.id }}</option>
-              </select>
+              <ModelCombobox
+                v-model="selectedModel"
+                :options="modelList"
+                :loading="modelsLoading"
+                placeholder="输入关键字搜索模型（如 gemini）"
+              />
             </div>
             <button class="btn btn-ghost btn-sm" @click="loadModels" :disabled="modelsLoading">刷新</button>
             <button class="btn btn-ghost btn-sm" @click="clearChat">清空</button>
@@ -138,6 +140,8 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { getStoredKey, setStoredKey, clearStoredKey, checkQuota, sendExperience, fetchExperienceModels } from '@/api/experience'
+import ModelCombobox from '@/components/ModelCombobox.vue'
+import { sortModels } from '@/utils/modelSort'
 
 const KEY_DEFAULT_TTL = 60 * 60 * 1000
 
@@ -236,7 +240,7 @@ async function fetchBalance() {
 async function loadModels() {
   modelsLoading.value = true
   try {
-    const list = await fetchExperienceModels()
+    const list = sortModels(await fetchExperienceModels())
     modelList.value = list
     if (list.length && !selectedModel.value) {
       const first = list[0]
@@ -541,11 +545,7 @@ onMounted(() => {
   gap: 10px;
 }
 .model-select-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.model-select { font-size: 13px; padding: 10px 12px; background-color: #FFFFFF; }
-.model-select option {
-  background-color: #FFFFFF;
-  color: var(--color-text-primary);
-}
+
 .btn-sm { padding: 8px 14px; font-size: 12px; }
 
 .chat-window {
