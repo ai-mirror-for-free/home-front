@@ -72,8 +72,6 @@ import {
   getPurchaseLinks,
   DEFAULT_TAOBAO_URL
 } from '@/api/siteLinks'
-// 中文简介 + 能力标签：由 scripts/sync_model_descriptions.py 从 shared/model_descriptions.yaml 生成
-import { MODEL_DESCRIPTIONS, TAG_LABELS_ZH } from '@/constants/modelDescriptions.generated.js'
 
 // 购买链接优先取后台「配置管理」，未配置时用常量兜底
 const taobaoUrl = ref(DEFAULT_TAOBAO_URL)
@@ -119,10 +117,18 @@ const getModelSeries = (modelName) => {
   return 'other'
 }
 
-// 能力标签：优先用共享文案表（英文规范写法），回落 new-api 返回的 tags
-const resolveTags = (modelName, modelData) => {
-  const fromMeta = MODEL_DESCRIPTIONS[modelName]?.tags
-  if (Array.isArray(fromMeta) && fromMeta.length) return fromMeta
+// 能力标签英文规范写法 → 中文展示名（数据由 scripts/sync_openrouter_models.py 写入 new-api 模型元数据）
+const TAG_LABELS_ZH = {
+  Reasoning: '推理',
+  Tools: '工具',
+  Files: '文件',
+  Vision: '视觉',
+  Audio: '音频',
+  Deprecated: '停用'
+}
+
+// 能力标签：new-api 模型元数据里的 tags（英文规范写法），每次同步自动更新
+const resolveTags = (modelData) => {
   if (!modelData?.tags) return []
   return modelData.tags.split(',').map(t => t.trim()).filter(Boolean)
 }
@@ -172,10 +178,8 @@ const resolveProvider = (item, series, vendorMap) => {
   return SERIES_PROVIDER[series] || 'Unknown'
 }
 
-// 生成描述文本：共享文案表 > new-api 元数据描述 > 厂商兑底文案
+// 描述文本：用 new-api 模型元数据里的英文原版描述（cron 每日同步），无则回落厂商兑底
 const getModelDesc = (modelName, modelData) => {
-  const fromMeta = MODEL_DESCRIPTIONS[modelName]?.desc
-  if (fromMeta) return fromMeta
   if (modelData?.description) return modelData.description
   const series = getModelSeries(modelName)
   return `${SERIES_PROVIDER[series] || 'Unknown'} 提供的 AI 模型`
@@ -224,7 +228,7 @@ async function fetchModels() {
           const name = item.model_name.includes('/') ? item.model_name.split('/')[1] : item.model_name
           const series = getModelSeries(item.model_name)
           const provider = resolveProvider(item, series, vendorMap)
-          const tags = resolveTags(name, item)
+          const tags = resolveTags(item)
           const cardTag = getModelTag(name, item, tags)
           return {
             id: item.model_name,
@@ -333,7 +337,7 @@ onMounted(() => {
 .tag-sm { font-size: 10px; padding: 4px 10px; flex-shrink: 0; }
 .tag-orange { color: #B87A4B; border-color: rgba(184,122,75,0.3); background: rgba(184,122,75,0.06); }
 .tag-yellow { color: #B89A4B; border-color: rgba(184,154,75,0.3); background: rgba(184,154,75,0.06); }
-.mc-desc { color: var(--color-text-secondary); font-size: 0.93rem; line-height: 1.7; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mc-desc { color: var(--color-text-secondary); font-size: 0.93rem; line-height: 1.7; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .mc-caps { display: flex; flex-wrap: wrap; gap: 6px; }
 .cap-chip {
   padding: 4px 10px;
