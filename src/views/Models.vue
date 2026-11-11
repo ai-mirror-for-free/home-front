@@ -143,12 +143,22 @@ const getModelTagClass = (tag) => {
   return classMap[tag] || 'tag-purple'
 }
 
+// 系列 → 供应商展示名（最后兜底用）
+const SERIES_PROVIDER = { gemini: 'Google', 'x-ai': 'xAI', openai: 'OpenAI', anthropic: 'Anthropic' }
+
+// 解析供应商：new-api 的 vendor_id 映射 > 模型名前缀 > 系列推断 > Unknown
+const resolveProvider = (item, series, vendorMap) => {
+  const fromVendor = item.vendor_id ? vendorMap[item.vendor_id] : null
+  if (fromVendor) return fromVendor
+  if (item.model_name.includes('/')) return item.model_name.split('/')[0]
+  return SERIES_PROVIDER[series] || 'Unknown'
+}
+
 // 生成描述文本
 const getModelDesc = (modelName, modelData) => {
   if (modelData?.description) return modelData.description
   const series = getModelSeries(modelName)
-  const seriesNames = { gemini: 'Google', 'x-ai': 'xAI', openai: 'OpenAI', anthropic: 'Anthropic' }
-  return `${seriesNames[series] || 'Unknown'} 提供的 AI 模型`
+  return `${SERIES_PROVIDER[series] || 'Unknown'} 提供的 AI 模型`
 }
 
 // 生成能力标签
@@ -188,11 +198,15 @@ async function fetchModels() {
     if (response.ok) {
       const data = await response.json()
       if (data?.data) {
+        // new-api 在顶层 vendors 里给出 {id,name,icon} 映射，模型只带 vendor_id
+        const vendorMap = {}
+        for (const v of data.vendors || []) {
+          if (v?.id && v?.name) vendorMap[v.id] = v.name
+        }
         allModels.value = data.data.map(item => {
           const name = item.model_name.includes('/') ? item.model_name.split('/')[1] : item.model_name
           const series = getModelSeries(item.model_name)
-          // gemini系列明确设置供应商为Google
-          const provider = series === 'gemini' ? 'Google' : (item.model_name.includes('/') ? item.model_name.split('/')[0] : 'Unknown')
+          const provider = resolveProvider(item, series, vendorMap)
           return {
             id: item.model_name,
             provider: provider,
