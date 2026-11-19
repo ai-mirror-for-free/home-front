@@ -178,6 +178,9 @@
           </div>
         </div>
 
+        <!-- 第三列：API 套餐介绍（上） + 反馈与工单（下，灰度用户可见） -->
+        <div class="card-column">
+
         <!-- API 套餐介绍卡片 -->
         <div class="card api-plan-card">
           <div class="card-header">
@@ -200,6 +203,52 @@
           </div>
         </div>
 
+        <!-- 反馈与工单卡片：灰度用户可用；非白名单展示置灰版（测试中，敬请期待） -->
+        <div
+          v-if="feedbackLoaded"
+          class="card feedback-card"
+          :class="{ 'is-disabled': !feedbackEntry.enabled }"
+        >
+          <div class="card-header">
+            <h2 class="card-title">反馈与工单</h2>
+          </div>
+          <div class="card-body">
+            <div class="feedback-intro">
+              <div class="feedback-intro-icon">💬</div>
+              <div>
+                <div class="feedback-intro-title">
+                  {{ feedbackEntry.enabled ? '遇到问题？直接提工单' : '功能测试中，敬请期待' }}
+                </div>
+                <p v-if="feedbackEntry.enabled" class="feedback-intro-desc">
+                  建议带上截图和报错文字，定位会快很多。图片与附件自工单关闭起保留 30 天，
+                  超期后只保留文字内容。
+                </p>
+                <p v-else class="feedback-intro-desc">
+                  反馈工单正在小范围灰度测试，后续会逐步对所有用户开放。
+                </p>
+              </div>
+            </div>
+            <div class="feedback-actions">
+              <button
+                class="btn btn-outline"
+                :disabled="!feedbackEntry.enabled"
+                @click="goFeedback"
+              >提交反馈</button>
+              <button
+                class="btn btn-primary"
+                :disabled="!feedbackEntry.enabled"
+                @click="goFeedback"
+              >
+                <template v-if="!feedbackEntry.enabled">我的工单</template>
+                <template v-else-if="feedbackEntry.unread">查看回复 ({{ feedbackEntry.unread }})</template>
+                <template v-else>我的工单</template>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        </div>
+
       </div>
     </div>
   </div>
@@ -212,6 +261,7 @@ import { useUserStore } from '@/stores/user'
 import { updateUserQuota, normalizeQuotaInfo } from '@/api/register'
 import { getInviteInfo } from '@/api/invite'
 import { getPurchaseLinks, DEFAULT_TAOBAO_URL } from '@/api/siteLinks'
+import { getTicketEntry } from '@/api/tickets'
 import { redeemCode } from '@/api/admin' // 假设redeemCode函数在admin.js中
 
 const userStore = useUserStore()
@@ -388,8 +438,30 @@ onMounted(() => {
   if (userStore.state.isLoggedIn) {
     fetchUserQuota()
     fetchInviteSummary()
+    fetchFeedbackEntry()
   }
 })
+
+// 反馈入口（灰度白名单可用；非白名单展示置灰版「测试中」）
+// loaded 为 false 时不渲染卡片，避免首屏先闪一个置灰版再变可用
+const feedbackEntry = reactive({ enabled: false, unread: 0 })
+const feedbackLoaded = ref(false)
+
+async function fetchFeedbackEntry() {
+  try {
+    const data = await getTicketEntry()
+    feedbackEntry.enabled = !!data?.enabled
+    feedbackEntry.unread = data?.unread || 0
+  } catch (e) {
+    feedbackEntry.enabled = false
+  } finally {
+    feedbackLoaded.value = true
+  }
+}
+
+function goFeedback() {
+  router.push('/feedback')
+}
 
 // 拉取邀请返利汇总（用于个人中心卡片展示）
 async function fetchInviteSummary() {
@@ -484,6 +556,19 @@ function goToInvite() {
   gap: 24px;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+/* 第三列：API 套餐（上）+ 反馈与工单（下）。
+   API 卡 flex:1 吃掉剩余高度，保证「无反馈权限用户」看到的列高与原来一致。 */
+.card-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 100%;
+}
+
+.card-column > .api-plan-card {
+  flex: 1 1 auto;
 }
 
 .card {
@@ -945,52 +1030,17 @@ function goToInvite() {
   }
 }
 
-/* API 套餐卡片 */
+/* API 套餐卡片（2026-11-19：去掉渐变主题，与其它白底卡片保持统一） */
 .api-plan-card {
   grid-column: span 1;
   position: relative;
-  overflow: hidden;
-  border: 1px solid transparent;
-  background:
-    linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
-    linear-gradient(135deg, #38bdf8, #a855f7, #ec4899) border-box;
-}
-
-.api-plan-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
-    radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.18), transparent 55%);
-  pointer-events: none;
-}
-
-.api-plan-card > * {
-  position: relative;
-  z-index: 1;
 }
 
 .api-plan-card .card-title {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, #38bdf8, #a855f7);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-weight: 700;
-}
-
-.api-plan-card .card-title::after {
-  content: 'NEW';
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #38bdf8, #a855f7);
-  color: #fff;
-  -webkit-text-fill-color: #fff;
+  color: var(--text-primary);
 }
 
 .api-plan-desc {
@@ -1022,7 +1072,7 @@ function goToInvite() {
   position: absolute;
   left: 0;
   top: 0;
-  color: #a855f7;
+  color: var(--color-accent);
   font-size: 1rem;
   line-height: 1.4;
 }
@@ -1030,18 +1080,6 @@ function goToInvite() {
 .api-plan-actions {
   display: flex;
   justify-content: flex-start;
-}
-
-.api-plan-actions .btn-primary {
-  background: linear-gradient(135deg, #38bdf8, #a855f7);
-  color: #fff;
-  box-shadow: 0 6px 18px rgba(168, 85, 247, 0.35);
-}
-
-.api-plan-actions .btn-primary:hover {
-  background: linear-gradient(135deg, #0ea5e9, #9333ea);
-  color: #fff;
-  box-shadow: 0 10px 24px rgba(168, 85, 247, 0.5);
 }
 
 @media (max-width: 480px) {
@@ -1155,7 +1193,10 @@ function goToInvite() {
 }
 
 .btn-primary:disabled {
-  background: var(--bg-disabled);
+  /* 2026-11-19：原为 var(--bg-disabled)（全局从未定义 → 背景变透明，白字不可见） */
+  background: var(--color-bg-accent);
+  color: var(--color-text-muted);
+  box-shadow: none;
   cursor: not-allowed;
   transform: none;
 }
@@ -1246,5 +1287,58 @@ function goToInvite() {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+}
+/* 反馈与工单卡片 */
+.feedback-intro {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.feedback-intro-icon {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.feedback-intro-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.feedback-intro-desc {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.feedback-actions .btn {
+  justify-content: center;
+}
+
+.feedback-actions .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 非灰度用户：整卡置灰 + 文案「功能测试中，敬请期待」 */
+.feedback-card.is-disabled .feedback-intro-icon,
+.feedback-card.is-disabled .feedback-intro-title,
+.feedback-card.is-disabled .feedback-intro-desc {
+  opacity: 0.55;
+}
+
+.feedback-card.is-disabled .feedback-intro-title {
+  color: var(--text-muted);
 }
 </style>

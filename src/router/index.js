@@ -10,6 +10,7 @@ import Plans from '../views/Plans.vue'
 import BillingRules from '../views/BillingRules.vue'
 import Experience from '../views/Experience.vue'
 import Invite from '../views/Invite.vue'
+import Feedback from '../views/Feedback.vue'
 
 const routes = [
   {
@@ -67,6 +68,12 @@ const routes = [
     path: '/invite',
     name: 'Invite',
     component: Invite,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/feedback',
+    name: 'Feedback',
+    component: Feedback,
     meta: { requiresAuth: true }
   }
 ]

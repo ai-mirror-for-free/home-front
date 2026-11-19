@@ -2,6 +2,9 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
 
+// 本地测试时可用环境变量把 /api/v1 指向本地 claude_agent（默认线上域名，生产构建不读这个配置）
+const CLAUDE_AGENT_TARGET = process.env.CLAUDE_AGENT_PROXY || 'https://chat.yang-sjq.cn'
+
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -12,9 +15,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-            // OpenWebUI 服务器，保持路径不变
+      // OpenWebUI 服务器，保持路径不变
       '/api/v1': {
-        target: 'https://chat.yang-sjq.cn',
+        target: CLAUDE_AGENT_TARGET,
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path
