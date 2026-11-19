@@ -210,7 +210,7 @@
             </div>
           </header>
 
-          <div class="thread">
+          <div ref="threadEl" class="thread">
             <div v-for="m in active.messages" :key="m.id" class="msg" :class="m.author_role">
               <div class="msg-head">
                 <span class="who">{{ m.author_role === 'admin' ? '官方客服' : '我' }}</span>
@@ -301,7 +301,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   CATEGORY_OPTIONS,
@@ -536,6 +536,7 @@ async function openTicket(id) {
     loadList(true)
     loadEntry()
     document.body.style.overflow = 'hidden'
+    scrollThreadBottom()
   } catch (e) {
     formError.value = e.message
   }
@@ -545,7 +546,6 @@ function closeDrawer() {
   active.value = null
   document.body.style.overflow = ''
 }
-
 async function submit() {
   formError.value = ''
   submitOk.value = ''
@@ -660,18 +660,93 @@ onMounted(async () => {
   await loadEntry()
   if (entry.enabled) {
     await loadList(true)
-    unreadTimer = setInterval(() => {
-      if (!document.hidden) loadEntry()
-    }, 30000)
+    startPolling()
   }
 })
 
 onUnmounted(() => {
-  if (unreadTimer) clearInterval(unreadTimer)
+  stopPolling()
   revokeAll(pending.value)
   revokeAll(replyPending.value)
   document.body.style.overflow = ''
 })
+
+// ─── 实时刷新（轮询）─────────────────────────────────────────────────
+// 静态站没有长连接：客服回复 / 工单状态变化靠轮询自己出现，不必刷新页面。
+// 约束：页面可见才轮询；提交/加载中跳过；只替换数据，不碰富输入框草稿与待发送附件。
+let detailTimer = null
+const threadEl = ref(null)
+
+function startPolling() {
+  stopPolling()
+  unreadTimer = setInterval(pollOverview, 20000)
+  detailTimer = setInterval(pollDetail, 10000)
+  document.addEventListener('visibilitychange', onPageVisible)
+}
+
+function stopPolling() {
+  if (unreadTimer) clearInterval(unreadTimer)
+  if (detailTimer) clearInterval(detailTimer)
+  unreadTimer = null
+  detailTimer = null
+  document.removeEventListener('visibilitychange', onPageVisible)
+}
+
+function onPageVisible() {
+  if (document.hidden) return
+  pollOverview()
+  pollDetail()
+}
+
+function listSig(list) {
+  return (list || [])
+    .map((x) => [x.id, x.status, x.user_unread, x.admin_unread, x.message_count, x.last_message_at].join('|'))
+    .join(';')
+}
+
+// 未读数 + 列表（保持用户已「加载更多」的页数，不缩回第一页）
+async function pollOverview() {
+  if (document.hidden || listLoading.value || submitting.value || replySending.value) return
+  loadEntry()
+  try {
+    const size = pageSize * Math.max(1, page.value)
+    const data = await listTickets({ page: 1, size })
+    const next = data.items || []
+    if (listSig(next) !== listSig(tickets.value)) tickets.value = next
+    total.value = data.total || 0
+  } catch (e) {
+    // 轮询失败静默
+  }
+}
+
+function detailSig(d) {
+  const ms = d?.messages || []
+  const last = ms[ms.length - 1]
+  return [d?.ticket?.status, ms.length, last?.id, last?.created_at].join('|')
+}
+
+function scrollThreadBottom() {
+  nextTick(() => {
+    const el = threadEl.value
+    if (el) el.scrollTop = el.scrollHeight
+  })
+}
+
+async function pollDetail() {
+  if (!active.value || document.hidden || replySending.value) return
+  const id = active.value.ticket?.id
+  if (!id) return
+  try {
+    const data = await getTicket(id)
+    if (!data || active.value?.ticket?.id !== id) return
+    if (detailSig(data) === detailSig(active.value)) return
+    active.value = data // 回复草稿 / 待发附件在独立 ref，不会被清掉
+    scrollThreadBottom()
+    loadEntry()
+  } catch (e) {
+    // 静默
+  }
+}
 </script>
 
 <style scoped>
