@@ -10,6 +10,8 @@
     <AppFooter />
     <!-- 固定悬浮图标 -->
     <FloatingIcons />
+    <!-- 全局运行时守卫：版本检测自动刷新 + 登录失效提示 -->
+    <RuntimeGuard />
   </div>
 </template>
 
@@ -22,6 +24,7 @@ import AppNav from './components/AppNav.vue'
 import AppFooter from './components/AppFooter.vue'
 import FloatingIcons from './components/FloatingIcons.vue'
 import NoticeCard from './components/NoticeCard.vue'
+import RuntimeGuard from './components/RuntimeGuard.vue'
 
 const route = useRoute()
 const router = useRouter()

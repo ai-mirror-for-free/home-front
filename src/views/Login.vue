@@ -188,8 +188,9 @@ async function handleLogin() {
       password: form.value.password
     }))
 
-    // 登录成功后跳转到个人中心页
-    router.push('/profile')
+    // 登录成功后整页跳转（而非 SPA 路由）：确保所有页面/组件重新初始化，
+    // 不残留登录前的旧数据（未读数、工单列表缓存等）。
+    window.location.href = '/profile'
   } catch (e) {
     console.error('Login error:', e)
     error.value = e.message || '登录失败，请检查邮箱或密码。'

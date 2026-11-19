@@ -17,6 +17,10 @@ async function parse(resp) {
     body = null
   }
   if (!resp.ok) {
+    // 401：登录态失效（轮询时静默失败也能被全局 RuntimeGuard 捕获并提示）
+    if (resp.status === 401 && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('app:auth-expired'))
+    }
     const msg = body?.message || body?.detail || `请求失败 (${resp.status})`
     const err = new Error(msg)
     err.status = resp.status
