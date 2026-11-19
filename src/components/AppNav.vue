@@ -11,8 +11,8 @@
         <li><RouterLink to="/models" class="nav-link">模型广场</RouterLink></li>
         <li><RouterLink to="/plans" class="nav-link">套餐介绍</RouterLink></li>
         <li><RouterLink to="/pricing" class="nav-link">定价方案</RouterLink></li>
-        <li><RouterLink to="/experience" class="nav-link">体验中心</RouterLink></li>
         <li><RouterLink to="/billing-rules" class="nav-link">计费规则</RouterLink></li>
+        <li><RouterLink to="/profile" class="nav-link">个人中心</RouterLink></li>
       </ul>
 
       <!-- Actions -->
@@ -73,8 +73,8 @@
       <RouterLink to="/models" class="mobile-link" @click="mobileOpen=false">模型广场</RouterLink>
       <RouterLink to="/plans" class="mobile-link" @click="mobileOpen=false">套餐介绍</RouterLink>
       <RouterLink to="/pricing" class="mobile-link" @click="mobileOpen=false">定价方案</RouterLink>
-      <RouterLink to="/experience" class="mobile-link" @click="mobileOpen=false">体验中心</RouterLink>
       <RouterLink to="/billing-rules" class="mobile-link" @click="mobileOpen=false">计费规则</RouterLink>
+      <RouterLink to="/profile" class="mobile-link" @click="mobileOpen=false">个人中心</RouterLink>
 
       <template v-if="userStore.state.isLoggedIn">
         <RouterLink to="/profile" class="mobile-link" @click="mobileOpen=false">个人中心</RouterLink>
