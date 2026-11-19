@@ -45,6 +45,9 @@
                 <RouterLink to="/invite" class="dropdown-item" @click="closeDropdown">
                   <i class="icon-invite"></i> 我的邀请
                 </RouterLink>
+                <RouterLink to="/feedback" class="dropdown-item" @click="closeDropdown">
+                  <i class="icon-feedback"></i> 我要反馈
+                </RouterLink>
                 <button class="dropdown-item" @click="handleLogout" @click.stop="closeDropdown">
                   <i class="icon-logout"></i> 退出登录
                 </button>
@@ -76,6 +79,7 @@
       <template v-if="userStore.state.isLoggedIn">
         <RouterLink to="/profile" class="mobile-link" @click="mobileOpen=false">个人中心</RouterLink>
         <RouterLink to="/invite" class="mobile-link" @click="mobileOpen=false">我的邀请</RouterLink>
+        <RouterLink to="/feedback" class="mobile-link" @click="mobileOpen=false">我要反馈</RouterLink>
         <div class="mobile-actions">
           <button @click="handleLogoutAndCloseMenu" class="btn btn-primary" style="width:100%;justify-content:center">退出登录</button>
         </div>
@@ -335,6 +339,7 @@ function handleScroll() {
 .icon-user::before { content: "👤"; margin-right: 10px; font-size: 14px; }
 .icon-invite::before { content: "🎁"; margin-right: 10px; font-size: 14px; }
 .icon-logout::before { content: "↩"; margin-right: 10px; font-size: 14px; }
+.icon-feedback::before { content: "💬"; margin-right: 10px; font-size: 14px; }
 
 .nav-actions {
   display: flex;

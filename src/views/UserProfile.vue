@@ -230,18 +230,14 @@
             </div>
             <div class="feedback-actions">
               <button
-                class="btn btn-outline"
-                :disabled="!feedbackEntry.enabled"
-                @click="goFeedback"
-              >提交反馈</button>
-              <button
                 class="btn btn-primary"
                 :disabled="!feedbackEntry.enabled"
                 @click="goFeedback"
               >
-                <template v-if="!feedbackEntry.enabled">我的工单</template>
-                <template v-else-if="feedbackEntry.unread">查看回复 ({{ feedbackEntry.unread }})</template>
-                <template v-else>我的工单</template>
+                <template v-if="feedbackEntry.enabled && feedbackEntry.unread">
+                  查看回复 ({{ feedbackEntry.unread }})
+                </template>
+                <template v-else>意见反馈</template>
               </button>
             </div>
           </div>
@@ -1322,6 +1318,7 @@ function goToInvite() {
 }
 
 .feedback-actions .btn {
+  flex: 1;
   justify-content: center;
 }
 
