@@ -142,6 +142,10 @@
               </div>
             </div>
 
+            <div v-else-if="loadingQuota" class="plans-skeleton" aria-hidden="true">
+              <div class="skeleton-block"></div>
+            </div>
+
             <div v-else class="plans-empty">
               <span class="plans-empty-icon">💳</span>
               <p>暂无套餐额度数据</p>
@@ -203,19 +207,27 @@
           </div>
         </div>
 
-        <!-- 反馈与工单卡片：灰度用户可用；非白名单展示置灰版（测试中，敬请期待） -->
+        <!-- 反馈与工单卡片：始终占位（加载中显示骨架），避免刷新时卡片「后弹出」引起整页跳动 -->
         <div
-          v-if="feedbackLoaded"
           class="card feedback-card"
-          :class="{ 'is-disabled': !feedbackEntry.enabled }"
+          :class="{ 'is-disabled': feedbackLoaded && !feedbackEntry.enabled }"
         >
           <div class="card-header">
             <h2 class="card-title">反馈与工单</h2>
           </div>
           <div class="card-body">
-            <div class="feedback-intro">
+            <!-- 骨架：沿用真实元素的字号与行高，只把文字换成灰条 → 高度与真实内容一致 -->
+            <div v-if="!feedbackLoaded" class="feedback-intro" aria-hidden="true">
               <div class="feedback-intro-icon">💬</div>
-              <div>
+              <div class="feedback-intro-main">
+                <div class="feedback-intro-title"><span class="skeleton-line w-45"></span></div>
+                <p class="feedback-intro-desc"><span class="skeleton-line w-90"></span></p>
+              </div>
+            </div>
+
+            <div v-else class="feedback-intro">
+              <div class="feedback-intro-icon">💬</div>
+              <div class="feedback-intro-main">
                 <div class="feedback-intro-title">
                   {{ feedbackEntry.enabled ? '遇到问题？直接提工单' : '功能测试中，敬请期待' }}
                 </div>
@@ -231,10 +243,10 @@
             <div class="feedback-actions">
               <button
                 class="btn btn-outline"
-                :disabled="!feedbackEntry.enabled"
+                :disabled="!feedbackLoaded || !feedbackEntry.enabled"
                 @click="goFeedback"
               >
-                <template v-if="feedbackEntry.enabled && feedbackEntry.unread">
+                <template v-if="feedbackLoaded && feedbackEntry.enabled && feedbackEntry.unread">
                   查看回复 ({{ feedbackEntry.unread }})
                 </template>
                 <template v-else>意见反馈</template>
@@ -439,7 +451,7 @@ onMounted(() => {
 })
 
 // 反馈入口（灰度白名单可用；非白名单展示置灰版「测试中」）
-// loaded 为 false 时不渲染卡片，避免首屏先闪一个置灰版再变可用
+// 卡片始终渲染：loaded 为 false 时显示骨架，避免「先没有卡片、后弹出」造成整页跳动
 const feedbackEntry = reactive({ enabled: false, unread: 0 })
 const feedbackLoaded = ref(false)
 
@@ -1303,6 +1315,75 @@ function goToInvite() {
   font-size: 0.9rem;
   line-height: 1.7;
   color: var(--text-secondary);
+  /* 固定 3 行高度：白名单 3 行文案、非白名单 2 行、骨架 1 行，卡片高度保持一致 */
+  min-height: 5.1em;
+}
+
+.feedback-intro-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 骨架灰条（内联，不改变所在元素的字号/行高/最小高度 → 与真实内容等高） */
+.skeleton-line {
+  display: inline-block;
+  width: 100%;
+  height: 0.85em;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 25%,
+    var(--color-bg-accent, #efece6) 37%,
+    var(--color-bg-secondary) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+.skeleton-line.w-45 {
+  width: 45%;
+}
+
+.skeleton-line.w-90 {
+  width: 90%;
+}
+
+.plans-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 空状态与骨架同高，加载完成时额度卡高度不变 */
+.plans-empty {
+  min-height: 155px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.plans-skeleton .skeleton-block {
+  /* 与「一个套餐卡 / 空状态占位」高度对齐，加载完成不跳动 */
+  height: 155px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-secondary) 25%,
+    var(--color-bg-accent, #efece6) 37%,
+    var(--color-bg-secondary) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
 }
 
 .feedback-actions {
