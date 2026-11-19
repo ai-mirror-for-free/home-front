@@ -73,14 +73,14 @@
               </div>
             </div>
 
-            <div v-if="error" class="error-msg">
+            <div v-if="displayError" class="error-msg">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              {{ error }}
+              {{ displayError }}
             </div>
 
-            <button type="submit" class="btn btn-primary submit-btn" :disabled="loading">
+            <button type="submit" class="btn btn-primary submit-btn" :disabled="loading || limitSeconds > 0">
               <span v-if="loading" class="loading-dot"></span>
-              {{ loading ? '登录中...' : '登录' }}
+              {{ loading ? '登录中...' : (limitSeconds > 0 ? buildLockedButtonLabel(limitSeconds) : '登录') }}
             </button>
           </form>
         </div>
@@ -90,10 +90,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user' // 导入用户状态管理
 import { resetRefreshFailureStreak } from '@/utils/tokenRefresh' // 登录成功重置静默续期熔断计数
+import {
+  buildLockedButtonLabel,
+  buildRateLimitMessage,
+  parseLoginRateLimit
+} from '@/utils/loginRateLimit'
 
 const router = useRouter()
 const { login } = useUserStore() // 解构出login方法
@@ -101,10 +106,43 @@ const form = ref({ email: '', password: '' })
 const showPwd = ref(false)
 const loading = ref(false)
 const error = ref('')
+// 登录限流（429）状态：倒计时期间禁止再次提交，文案按 reason 每秒重算
+const limitSeconds = ref(0)
+const limitReason = ref(null)
+const limitServerMessage = ref('')
+let limitTimer = null
+
+// 展示优先级：限流倒计时（动态）> 其它错误 > 无
+const displayError = computed(() =>
+  limitSeconds.value > 0
+    ? buildRateLimitMessage(limitReason.value, limitSeconds.value, limitServerMessage.value)
+    : error.value
+)
+
+function stopLimitTimer() {
+  if (limitTimer) {
+    clearInterval(limitTimer)
+    limitTimer = null
+  }
+}
+
+function startLimitCountdown(seconds) {
+  stopLimitTimer()
+  limitSeconds.value = Math.max(0, Math.floor(seconds))
+  if (limitSeconds.value <= 0) return
+  limitTimer = setInterval(() => {
+    limitSeconds.value = Math.max(0, limitSeconds.value - 1)
+    if (limitSeconds.value <= 0) stopLimitTimer()
+  }, 1000)
+}
+
+onUnmounted(stopLimitTimer)
 
 const modelPills = ['Claude Opus', 'Claude Sonnet', 'Claude Haiku', 'API']
 
 async function handleLogin() {
+  // 倒计时未结束时不发请求：既省一次 429，也避免用户以为自己没点成功
+  if (limitSeconds.value > 0 || loading.value) return
   loading.value = true
   error.value = ''
 
@@ -125,6 +163,18 @@ async function handleLogin() {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
+      if (response.status === 429) {
+        // 限流：按 reason 选文案 + 开倒计时（文案每秒由倒计时重算）
+        const header = response.headers.get('Retry-After')
+        const parsed = parseLoginRateLimit(errorData, header ? Number(header) : null)
+        limitReason.value = parsed.reason
+        limitServerMessage.value = parsed.serverMessage
+        startLimitCountdown(parsed.seconds)
+        error.value = ''
+        throw new Error('rate-limited')
+      }
+      // 非 429：清掉限流状态，按原有逻辑取文案
+      startLimitCountdown(0)
       // 检查错误信息中的detail字段，显示更友好的错误提示
       if (errorData.detail && typeof errorData.detail === 'string') {
         if (errorData.detail.includes('username') || errorData.detail.includes('password') || errorData.detail.includes('用户名') || errorData.detail.includes('密码')) {
@@ -193,6 +243,8 @@ async function handleLogin() {
     window.location.href = '/profile'
   } catch (e) {
     console.error('Login error:', e)
+    // 限流文案已由倒计时接管（见 displayError），这里不再覆盖 error
+    if (e && e.message === 'rate-limited') return
     error.value = e.message || '登录失败，请检查邮箱或密码。'
   } finally {
     loading.value = false
