@@ -315,6 +315,7 @@ import {
   listTickets
 } from '@/api/tickets'
 import { useUserStore } from '@/stores/user'
+import { createPoller } from '@/utils/poller'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -512,6 +513,11 @@ async function loadList(reset = true) {
     if (reset) tickets.value = data.items || []
     else tickets.value = tickets.value.concat(data.items || [])
     total.value = data.total || 0
+    // 列表响应顺带带未读数与轮询参数（省掉单独的 entry 请求）
+    if (typeof data.unread === 'number') entry.unread = data.unread
+    else loadEntry() // 后端尚未升级时的兜底（旧版 list 不带 unread）
+    if (data.enabled === false) entry.enabled = false
+    applyPollSettings(data.poll_seconds)
   } catch (e) {
     formError.value = e.message
   } finally {
@@ -674,29 +680,11 @@ onUnmounted(() => {
 // ─── 实时刷新（轮询）─────────────────────────────────────────────────
 // 静态站没有长连接：客服回复 / 工单状态变化靠轮询自己出现，不必刷新页面。
 // 约束：页面可见才轮询；提交/加载中跳过；只替换数据，不碰富输入框草稿与待发送附件。
-let detailTimer = null
+// 调度器（utils/poller.js）负责节流：页面隐藏不发请求、连续无变化退避、
+// 长时间无操作停表；这里只负责「一轮怎么拉数据」并返回本轮是否有变化。
 const threadEl = ref(null)
-
-function startPolling() {
-  stopPolling()
-  unreadTimer = setInterval(pollOverview, 20000)
-  detailTimer = setInterval(pollDetail, 10000)
-  document.addEventListener('visibilitychange', onPageVisible)
-}
-
-function stopPolling() {
-  if (unreadTimer) clearInterval(unreadTimer)
-  if (detailTimer) clearInterval(detailTimer)
-  unreadTimer = null
-  detailTimer = null
-  document.removeEventListener('visibilitychange', onPageVisible)
-}
-
-function onPageVisible() {
-  if (document.hidden) return
-  pollOverview()
-  pollDetail()
-}
+let overviewPoller = null
+let detailPoller = null
 
 function listSig(list) {
   return (list || [])
@@ -704,18 +692,49 @@ function listSig(list) {
     .join(';')
 }
 
-// 未读数 + 列表（保持用户已「加载更多」的页数，不缩回第一页）
+// 后端下发的轮询参数（config.yaml tickets.poll），改配置即可调速
+function applyPollSettings(cfg) {
+  if (!cfg) return
+  if (overviewPoller) {
+    overviewPoller.setBase((cfg.primary || 20) * 1000)
+    overviewPoller.setMax((cfg.max_interval || 60) * 1000)
+    overviewPoller.setIdle((cfg.idle_seconds || 600) * 1000)
+  }
+  if (detailPoller) {
+    detailPoller.setBase((cfg.detail || 10) * 1000)
+    detailPoller.setMax((cfg.max_interval || 60) * 1000)
+    detailPoller.setIdle((cfg.idle_seconds || 600) * 1000)
+  }
+}
+
+// 一个请求同时覆盖「列表 + 未读数」（未读数已并入 /api/tickets 响应）
 async function pollOverview() {
-  if (document.hidden || listLoading.value || submitting.value || replySending.value) return
-  loadEntry()
+  if (listLoading.value || submitting.value || replySending.value) return false
   try {
     const size = pageSize * Math.max(1, page.value)
     const data = await listTickets({ page: 1, size })
+    applyPollSettings(data.poll_seconds)
+    let changed = false
+    if (typeof data.unread === 'number') {
+      if (data.unread !== entry.unread) {
+        entry.unread = data.unread
+        changed = true
+      }
+    } else {
+      loadEntry() // 后端尚未升级时的兜底
+    }
     const next = data.items || []
-    if (listSig(next) !== listSig(tickets.value)) tickets.value = next
-    total.value = data.total || 0
+    if (listSig(next) !== listSig(tickets.value)) {
+      tickets.value = next
+      changed = true
+    }
+    if ((data.total || 0) !== total.value) {
+      total.value = data.total || 0
+      changed = true
+    }
+    return changed
   } catch (e) {
-    // 轮询失败静默
+    return false // 轮询失败静默
   }
 }
 
@@ -733,19 +752,34 @@ function scrollThreadBottom() {
 }
 
 async function pollDetail() {
-  if (!active.value || document.hidden || replySending.value) return
+  if (!active.value || replySending.value) return false
   const id = active.value.ticket?.id
-  if (!id) return
+  if (!id) return false
   try {
     const data = await getTicket(id)
-    if (!data || active.value?.ticket?.id !== id) return
-    if (detailSig(data) === detailSig(active.value)) return
+    if (!data || active.value?.ticket?.id !== id) return false
+    if (detailSig(data) === detailSig(active.value)) return false
     active.value = data // 回复草稿 / 待发附件在独立 ref，不会被清掉
     scrollThreadBottom()
-    loadEntry()
+    return true
   } catch (e) {
-    // 静默
+    return false // 静默
   }
+}
+
+function startPolling() {
+  stopPolling()
+  overviewPoller = createPoller({ task: pollOverview, primary: 20000, maxInterval: 60000, idleSeconds: 600 })
+  detailPoller = createPoller({ task: pollDetail, primary: 10000, maxInterval: 60000, idleSeconds: 600 })
+  overviewPoller.start()
+  detailPoller.start()
+}
+
+function stopPolling() {
+  overviewPoller?.stop()
+  detailPoller?.stop()
+  overviewPoller = null
+  detailPoller = null
 }
 </script>
 
