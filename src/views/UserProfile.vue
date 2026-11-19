@@ -196,7 +196,7 @@
               <li>高并发稳定可用，提供详细调用日志</li>
             </ul>
             <div class="api-plan-actions">
-              <button @click="goToExperience" class="btn btn-primary">
+              <button @click="goToExperience" class="btn btn-outline">
                 前往体验中心
               </button>
             </div>
@@ -230,7 +230,7 @@
             </div>
             <div class="feedback-actions">
               <button
-                class="btn btn-primary"
+                class="btn btn-outline"
                 :disabled="!feedbackEntry.enabled"
                 @click="goFeedback"
               >
@@ -1075,16 +1075,12 @@ function goToInvite() {
 
 .api-plan-actions {
   display: flex;
-  justify-content: flex-start;
+  justify-content: stretch;
 }
 
-@media (max-width: 480px) {
-  .api-plan-actions {
-    justify-content: stretch;
-  }
-  .api-plan-actions .btn {
-    width: 100%;
-  }
+/* 与「开始聊天」同形：整行大按钮，白色描边 */
+.api-plan-actions .btn {
+  width: 100%;
 }
 
 /* 兑换码卡片样式 */
