@@ -15,7 +15,8 @@
           <strong>国内直连</strong>，无需翻墙，按需付费。
         </p>
         <div class="hero-cta">
-          <RouterLink to="/login" class="btn btn-primary btn-lg">立即体验</RouterLink>
+          <button v-if="isLoggedIn" class="btn btn-primary btn-lg" @click="handleTryNow">立即体验</button>
+          <RouterLink v-else to="/login" class="btn btn-primary btn-lg">立即体验</RouterLink>
           <RouterLink to="/plans" class="btn btn-outline btn-lg">套餐介绍</RouterLink>
           <RouterLink to="/models" class="btn btn-outline btn-lg">查看所有模型</RouterLink>
         </div>
@@ -167,9 +168,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useUserStore } from '@/stores/user'
 
 const modelCount = ref('50+')
+
+const userStore = useUserStore()
+// 有 token 才算已登录（isLoggedIn 可能残留 true 而 token 已被清）
+const isLoggedIn = computed(() => !!userStore.getToken())
+
+// 已登录：直接新标签打开 Claude 聊天站（与个人中心「开始聊天」同一套 URL 参数）
+function handleTryNow() {
+  const token = userStore.getToken()
+  if (!token) {
+    window.location.href = '/login'
+    return
+  }
+  const parts = window.location.hostname.split('.')
+  const mainDomain = parts.slice(-2).join('.')
+  let targetUrl = `https://claude.${mainDomain}/?token=${encodeURIComponent(token)}`
+  const refreshToken = localStorage.getItem('refresh_token') || ''
+  const sessionId = localStorage.getItem('currentSessionId') || ''
+  if (refreshToken) targetUrl += `&refresh_token=${encodeURIComponent(refreshToken)}`
+  if (sessionId) targetUrl += `&session_id=${encodeURIComponent(sessionId)}`
+  window.open(targetUrl, '_blank')
+}
 
 async function fetchModelCount() {
   try {
